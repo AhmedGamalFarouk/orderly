@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../Firebase/api_util";
-import { EmailIcon, PasswordIcon, OrderlyBrandIcon } from "../assets/icons/icons";
+import { EmailIcon, PasswordIcon, OrderlyBrandIcon, SparklesIcon } from "../assets/icons/icons";
 import { handleToast, handleWarning } from "./alerts";
 import { useDispatch } from "react-redux";
 import { setAdmin } from "../features/slices/adminReducer";
@@ -179,13 +179,38 @@ export default function Auth() {
           OR
         </div>
 
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          className="btn btn-outline w-full rounded-xl py-3 text-xs font-semibold flex items-center justify-center gap-2 border-base-300 hover:bg-base-200"
-        >
-          <span className="font-bold text-sm text-primary">G</span> Continue with Google
-        </button>
+        <div className="space-y-2.5">
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="btn btn-outline w-full rounded-xl py-3 text-xs font-semibold flex items-center justify-center gap-2 border-base-300 hover:bg-base-200"
+          >
+            <span className="font-bold text-sm text-primary">G</span> Continue with Google
+          </button>
+
+          <button
+            type="button"
+            onClick={async () => {
+              setError("");
+              setLoading(true);
+              try {
+                const cred = await api.auth.login("ahmedjamal5565@gmail.com", "123456Maz", true);
+                dispatch(setAdmin({ id: cred.user.uid }));
+                sessionStorage.setItem("internal-nav", "true");
+                handleToast("Signed in as Demo User!");
+                navigate("/home");
+              } catch (err) {
+                setError(err.message || "Demo login failed.");
+              } finally {
+                setLoading(false);
+              }
+            }}
+            disabled={loading}
+            className="btn btn-secondary btn-outline w-full rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 border-secondary/40 hover:bg-secondary hover:text-secondary-content"
+          >
+            <SparklesIcon className="w-4 h-4" /> Skip Auth (Demo Sign In)
+          </button>
+        </div>
 
         <p className="text-center text-xs text-neutral mt-6">
           Don't have an account?{" "}
@@ -197,3 +222,4 @@ export default function Auth() {
     </div>
   );
 }
+
