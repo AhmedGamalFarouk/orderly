@@ -167,8 +167,21 @@ export default function SignUp() {
               setError("");
               setLoading(true);
               try {
-                const cred = await api.auth.login("ahmedjamal5565@gmail.com", "123456Maz", true);
-                dispatch(setAdmin({ id: cred.user.uid }));
+                let cred;
+                try {
+                  cred = await api.auth.login("ahmedjamal5565@gmail.com", "123456Maz", true);
+                } catch (loginErr) {
+                  if (
+                    loginErr.code === "auth/user-not-found" ||
+                    loginErr.code === "auth/invalid-credential"
+                  ) {
+                    cred = await api.auth.signUp("ahmedjamal5565@gmail.com", "123456Maz");
+                  } else {
+                    throw loginErr;
+                  }
+                }
+                const user = cred.user;
+                dispatch(setAdmin({ id: user.uid }));
                 sessionStorage.setItem("internal-nav", "true");
                 handleToast("Signed in as Demo User!");
                 navigate("/home");

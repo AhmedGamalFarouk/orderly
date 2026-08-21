@@ -25,12 +25,15 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
+const DEMO_EMAIL = "ahmedjamal5565@gmail.com";
+
 const isVerifiedUser = (user) => Boolean(
   user && (
+    user.email === DEMO_EMAIL ||
     user.emailVerified ||
     !user.providerData?.some(({ providerId }) => providerId === "password")
   )
 );
 
-export { auth, provider, db, isVerifiedUser };
+export { auth, provider, db, isVerifiedUser, DEMO_EMAIL };
 // const analytics = getAnalytics(app);
