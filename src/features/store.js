@@ -18,16 +18,16 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
-import storage from "redux-persist/lib/storage"; // uses localStorage for web
+import storage from "redux-persist/lib/storage/index.js"; // uses localStorage for web
 
 // Your reducers
-import spaceReducer from "./slices/spaceReducer";
-import participantsReducer from "./slices/participantsReducer";
-import orderReducer from "./slices/orderSlice";
-import adminReducer from "./slices/adminReducer";
-import menuReducer from "./slices/menuSlice";
-import singlemenuReducer from "./slices/singlemenu";
-import { collectiveOrdersSlice } from "./slices/collectiveOrderReducer";
+import spaceReducer from "./slices/spaceReducer.js";
+import participantsReducer from "./slices/participantsReducer.js";
+import orderReducer from "./slices/orderSlice.js";
+import adminReducer from "./slices/adminReducer.js";
+import menuReducer from "./slices/menuSlice.js";
+import singlemenuReducer from "./slices/singlemenu.js";
+import { collectiveOrdersSlice } from "./slices/collectiveOrderReducer.js";
 
 // Combine all your slices
 const rootReducer = combineReducers({
@@ -37,7 +37,7 @@ const rootReducer = combineReducers({
   order: orderReducer,
   admin: adminReducer,
   single: singlemenuReducer,
-  collective: collectiveOrdersSlice
+  collective: collectiveOrdersSlice.reducer
 });
 
 // Configure persist
@@ -45,7 +45,7 @@ const persistConfig = {
   key: "root",
   version: 1,
   storage,
-  whitelist: ["admin"], // only these will be persisted
+  whitelist: ["admin", "order"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

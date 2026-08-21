@@ -1,70 +1,63 @@
-import { useDispatch, useSelector } from "react-redux";
-import { HourGlass } from "../../assets/icons";
+import { useSelector } from "react-redux";
 import Avatar from "../Avatar";
-import { useEffect } from "react";
-import {
-  fetchParticipants,
-  saveParticipantOrder,
-  selectItem,
-} from "../../features/slices/participantsReducer";
+import { UsersIcon } from "../../assets/icons/icons";
 
 export default function Participants() {
-  // const spaceId = useSelector((state) => state.admin.currentSpace);
-  // const { arr } = useSelector((state) => state.singlemenu);
-  // console.log();
-  // const dispatch = useDispatch();
-  const dispatch = useDispatch();
   const participants = useSelector((state) => state.participants);
-  const spaceId = useSelector((state) => state.admin.currentSpace);
-
-  useEffect(() => {
-    // Fetch participants when component mounts
-    dispatch(fetchParticipants(spaceId));
-  }, [dispatch, spaceId]);
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (participants.length > 0) {
-  //       // Dispatch saveParticipantOrder for each participant
-  //       participants.forEach((participant) => {
-  //         dispatch(
-  //           saveParticipantOrder({
-  //             spaceId,
-  //             participantId: participant.id,
-  //             selectItems: participant.selectedItems,
-  //           })
-  //         );
-  //         dispatch(fetchParticipants(spaceId));
-  //       });
-  //     }
-  //   }, 10000); // every 10 seconds
-
-  //   // Cleanup on unmount
-  //   return () => clearInterval(interval);
-  // }, [participants, dispatch]);
-
-  //
 
   return (
-    <div className="bg-base-200 px-6 py-4 shadow-sm rounded-xl">
-      <p className="text-lg font-semibold text-secondary">Participants</p>
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <UsersIcon className="w-5 h-5 text-primary" />
+          <h3 className="font-heading text-lg font-bold text-base-content">
+            Participants
+          </h3>
+        </div>
+        <span className="badge badge-sm badge-ghost font-semibold text-xs text-neutral">
+          {participants.length} {participants.length === 1 ? "person" : "people"}
+        </span>
+      </div>
 
-      {/* items WRAPPER */}
-      <div className="wrapper flex flex-col gap-y-2 justify-between mt-6 items-center overflow-y-scroll max-h-80">
+      {/* Participants List */}
+      <div className="flex flex-col gap-2 overflow-y-auto max-h-52 pr-1">
         {participants.length === 0 ? (
-          <p className="text-sm text-gray-500">No participants yet.</p>
+          <div className="text-center py-4 px-2 bg-base-200/40 rounded-xl border border-dashed border-base-300/60">
+            <p className="text-xs text-neutral">Waiting for friends to join...</p>
+          </div>
         ) : (
-          participants.map((participant) => (
-            <div
-              key={participant.id}
-              className="item flex justify-between w-full items-center"
-            >
-              <div className="flex items-center gap-4">
-                <Avatar title={participant.name} />
-                {participant.name}
+          participants.map((participant) => {
+            const itemCount = (participant.selectedItems || []).reduce(
+              (sum, item) => sum + Number(item.quantity || 0),
+              0
+            );
+
+            return (
+              <div
+                key={participant.id}
+                className="flex justify-between items-center p-2 rounded-xl bg-base-200/40 hover:bg-base-200/80 transition-colors border border-base-200/50"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Avatar title={participant.name} className="w-8 h-8 text-xs font-bold" />
+                  <span className="font-body text-sm font-medium text-base-content truncate max-w-[120px]">
+                    {participant.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {itemCount > 0 ? (
+                    <span className="text-[11px] font-semibold text-secondary px-2 py-0.5 bg-secondary/10 rounded-full">
+                      {itemCount} {itemCount === 1 ? "item" : "items"}
+                    </span>
+                  ) : (
+                    <span className="text-[11px] text-neutral/60 px-2 py-0.5 bg-base-300/40 rounded-full">
+                      browsing
+                    </span>
+                  )}
+                  <span className="w-2 h-2 rounded-full bg-success inline-block shadow-xs" title="Connected" />
+                </div>
               </div>
-              <HourGlass />
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

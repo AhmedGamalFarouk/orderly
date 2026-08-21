@@ -12,7 +12,7 @@ export default function LoginForm() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      api.auth.login(email, password, rememberMe);
+      await api.auth.login(email, password, rememberMe);
       console.log("User logged in!");
     } catch (err) {
       setError(err.message);

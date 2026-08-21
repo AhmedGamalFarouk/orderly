@@ -1,51 +1,56 @@
 // src/components/Auth.jsx
 import { useState } from "react";
-import { useNavigate } from "react-router";
-import { api } from "../Firebase/api_util"; // Your API layer
-import { EmailIcon, PasswordIcon } from "../assets/icons/icons";
-import { handleWarning } from "./alerts";
-import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { api } from "../Firebase/api_util";
+import { EmailIcon, PasswordIcon, OrderlyBrandIcon } from "../assets/icons/icons";
+import { handleToast, handleWarning } from "./alerts";
+import { useDispatch } from "react-redux";
 import { setAdmin } from "../features/slices/adminReducer";
-// import { FcGoogle as GoogleIcon } from "react-icons/fc"; // Fallback if <feFuncG /> was a typo
+import Button from "./Button";
+import FormInput from "./FormInput";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const [user, setUser] = useState(null);
   const [error, setError] = useState("");
+  const [verificationPending, setVerificationPending] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const admin = useSelector((state) => state.admin);
   const dispatch = useDispatch();
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setVerificationPending(false);
+    setLoading(true);
 
     try {
-      const userCredential = await api.auth.login(email, password);
+      const userCredential = await api.auth.login(email, password, rememberMe);
       const user = userCredential.user;
 
       if (!user.emailVerified) {
-        // 👇 Show warning and sign out
         handleWarning();
-        await api.auth.signOut(); // Prevent access
+        setVerificationPending(true);
+        await api.auth.logout();
         return;
       }
 
-      // ✅ Continue login
       dispatch(setAdmin({ id: user.uid }));
-
-      navigate("/home"); // or your home page
+      sessionStorage.setItem("internal-nav", "true");
+      navigate("/home");
     } catch (err) {
       switch (err.code) {
         case "auth/user-not-found":
         case "auth/wrong-password":
+        case "auth/invalid-credential":
           setError("Invalid email or password.");
           break;
         default:
-          setError(err.message);
+          setError(err.message || "Failed to sign in.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,95 +58,142 @@ export default function Auth() {
     try {
       const result = await api.auth.loginWithGoogle();
       const user = result.user;
-      setUser(user);
-
       dispatch(setAdmin({ id: user.uid }));
       sessionStorage.setItem("internal-nav", "true");
       navigate("/home");
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Google sign-in failed.");
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError("Please enter your email address first.");
+      return;
+    }
+
+    try {
+      await api.auth.resetPassword(email);
+      setError("");
+      handleToast("Password reset link sent to your email!");
+    } catch (err) {
+      setError(err.message || "Could not send reset email.");
+    }
+  };
+
+  const handleResendVerification = async () => {
+    try {
+      await api.auth.resendVerification(email, password);
+      handleToast("Verification email resent!");
+    } catch (err) {
+      setError(err.message || "Could not resend email.");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-base-200">
-      <form
-        className="card w-full max-w-md bg-white shadow-sm"
-        onSubmit={handleEmailLogin}
-      >
-        <div className="card-body">
-          <h2 className="text-3xl font-bold text-center">Sign in</h2>
-          <p className="text-sm text-center text-gray-500 mb-4">
-            Please enter your login and password!
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-base-100 py-12 px-4 sm:px-6">
+      <div className="card w-full max-w-md bg-white rounded-3xl p-8 border border-base-200 shadow-sm animate-fade-in-up">
+        {/* Brand Header */}
+        <div className="text-center mb-6">
+          <div className="inline-flex p-3 bg-primary/10 text-primary rounded-2xl mb-3">
+            <OrderlyBrandIcon className="w-8 h-8" />
+          </div>
+          <h1 className="font-heading text-3xl font-bold text-base-content">
+            Welcome Back
+          </h1>
+          <p className="font-body text-xs text-neutral mt-1">
+            Sign in to manage and join group food orders
           </p>
+        </div>
 
-          {error && <p className="text-red-500 text-center">{error}</p>}
-
-          <div className="form-control mb-3 text-center">
-            <label className="input validator">
-              <EmailIcon />
-              <input
-                type="email"
-                placeholder="mail@site.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </label>
+        {error && (
+          <div className="mb-4 p-3 bg-error/10 border border-error/20 rounded-xl text-center">
+            <p className="text-xs font-medium text-error">{error}</p>
           </div>
+        )}
 
-          <div className="form-control mb-3 text-center">
-            <label className="input validator">
-              <PasswordIcon />
-              <input
-                type="password"
-                required
-                placeholder="Password"
-                minLength={8}
-                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-                title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </label>
+        {verificationPending && (
+          <div className="mb-4 text-center">
+            <button
+              type="button"
+              className="text-xs text-primary font-semibold hover:underline"
+              onClick={handleResendVerification}
+            >
+              Resend verification email
+            </button>
           </div>
+        )}
 
-          <div className="form-control mb-4">
-            <label className="label cursor-pointer">
+        <form onSubmit={handleEmailLogin} className="space-y-4">
+          <FormInput
+            label="Email Address"
+            type="email"
+            placeholder="you@company.com"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            icon={<EmailIcon className="w-4 h-4 text-neutral" />}
+          />
+
+          <FormInput
+            label="Password"
+            type="password"
+            placeholder="••••••••"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            icon={<PasswordIcon className="w-4 h-4 text-neutral" />}
+          />
+
+          <div className="flex items-center justify-between text-xs pt-1">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
-                className="checkbox"
+                className="checkbox checkbox-primary checkbox-xs rounded-md"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
               />
-              <span className="label-text ml-2">Remember password</span>
+              <span className="text-neutral font-medium">Remember me</span>
             </label>
+
+            <button
+              type="button"
+              className="text-primary font-semibold hover:underline"
+              onClick={handleForgotPassword}
+            >
+              Forgot password?
+            </button>
           </div>
 
-          <button className="btn btn-primary w-full mb-2" type="submit">
-            Login
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-accent btn-outline-primary w-full mb-2"
-            onClick={() => navigate("/signup")}
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-full py-3.5 rounded-xl text-sm font-bold shadow-xs mt-2"
+            disabled={loading}
           >
-            Sign Up
-          </button>
+            {loading ? "Signing in..." : "Sign In"}
+          </Button>
+        </form>
 
-          <div className="divider">OR</div>
-
-          <button
-            type="button"
-            className="btn btn-outline w-full mb-2"
-            onClick={handleGoogleLogin}
-          >
-            {/* <GoogleIcon className="text-xl mr-2" /> */}
-            Sign in with Google
-          </button>
+        <div className="divider text-xs text-neutral/70 font-body my-5 uppercase tracking-wider">
+          OR
         </div>
-      </form>
+
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          className="btn btn-outline w-full rounded-xl py-3 text-xs font-semibold flex items-center justify-center gap-2 border-base-300 hover:bg-base-200"
+        >
+          <span className="font-bold text-sm text-primary">G</span> Continue with Google
+        </button>
+
+        <p className="text-center text-xs text-neutral mt-6">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-primary font-bold hover:underline">
+            Sign Up
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,55 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownsSpace(spaceId) {
+      return signedIn()
+        && get(/databases/$(database)/documents/spaces/$(spaceId)).data.adminId == request.auth.uid;
+    }
+
+    function ownsSpaceAfter(spaceId) {
+      return signedIn()
+        && getAfter(/databases/$(database)/documents/spaces/$(spaceId)).data.adminId == request.auth.uid;
+    }
+
+    match /spaces/{spaceId} {
+      // Invite links need to resolve a space, while the dashboard query is
+      // restricted to the authenticated owner by the returned document.
+      allow get: if true;
+      allow list: if signedIn() && resource.data.adminId == request.auth.uid;
+      allow create: if signedIn()
+        && request.resource.data.adminId == request.auth.uid;
+      allow update, delete: if ownsSpace(spaceId);
+
+      match /menueItems/{itemId} {
+        allow read: if true;
+        allow write: if ownsSpace(spaceId) || ownsSpaceAfter(spaceId);
+      }
+
+      match /participants/{participantId} {
+        allow read: if true;
+        // Guests are unauthenticated by design. They may create/update their
+        // participant document, but cannot delete participants.
+        allow create: if get(/databases/$(database)/documents/spaces/$(spaceId)).data.status != 'finalized'
+          && !get(/databases/$(database)/documents/spaces/$(spaceId)).data.keys().hasAny(['finalizedOrder'])
+          && request.resource.data.spaceId == spaceId
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() <= 80
+          && request.resource.data.selectedItems is list;
+        allow update: if get(/databases/$(database)/documents/spaces/$(spaceId)).data.status != 'finalized'
+          && !get(/databases/$(database)/documents/spaces/$(spaceId)).data.keys().hasAny(['finalizedOrder'])
+          && request.resource.data.spaceId == spaceId
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() <= 80
+          && request.resource.data.selectedItems is list;
+        allow delete: if ownsSpace(spaceId);
+      }
+    }
+  }
+}

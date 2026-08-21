@@ -1,150 +1,124 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import Container from '../components/Container';
+import { SparklesIcon } from '../assets/icons/icons';
+import Button from '../components/Button';
+import FormInput from '../components/FormInput';
 
 const ContactUsPage = () => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      className="min-h-screen bg-base-100 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="max-w-4xl w-full space-y-8 bg-base-200 p-10 rounded-xl shadow-lg"
-      >
-        <div>
-          <motion.h2
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="mt-6 text-center text-4xl font-extrabold text-primary"
-          >
-            Contact Us
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="mt-2 text-center text-lg text-base-content"
-          >
-            We'd love to hear from you! Please fill out the form below or use our alternative contact methods.
-          </motion.p>
-        </div>
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const subject = encodeURIComponent(data.get('subject') || 'Orderly Inquiry');
+    const body = encodeURIComponent(`Name: ${data.get('name')}\nEmail: ${data.get('email')}\n\n${data.get('message')}`);
+    window.location.href = `mailto:contact@orderly.com?subject=${subject}&body=${body}`;
+  };
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {/* Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="card bg-base-100 shadow-xl p-6"
-          >
-            <h3 className="text-2xl font-bold text-secondary mb-4">Send us a message</h3>
-            <form className="space-y-6">
-              <div>
-                <label htmlFor="name" className="label">
-                  <span className="label-text text-base-content">Name</span>
-                </label>
-                <input
-                  id="name"
+  return (
+    <div className="min-h-[calc(100vh-4rem)] bg-base-100 py-12">
+      <Container>
+        <div className="max-w-4xl mx-auto space-y-10 animate-fade-in-up">
+          {/* Header Banner */}
+          <div className="bg-white rounded-3xl p-8 sm:p-12 border border-base-200 shadow-xs text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold mb-3">
+              <SparklesIcon className="w-3.5 h-3.5" />
+              <span>Get in Touch</span>
+            </div>
+            <h1 className="font-heading text-4xl sm:text-5xl font-extrabold text-base-content tracking-tight mb-3">
+              Contact Orderly
+            </h1>
+            <p className="font-body text-base text-neutral max-w-xl mx-auto">
+              Have questions, feedback, or need help with a group order space? We'd love to hear from you.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+            {/* Form */}
+            <div className="md:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-base-200 shadow-xs">
+              <h2 className="font-heading text-2xl font-bold text-base-content mb-6">
+                Send Us a Message
+              </h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <FormInput
+                  label="Your Name"
                   name="name"
-                  type="text"
-                  autoComplete="name"
+                  placeholder="Alex Morgan"
                   required
-                  className="input input-bordered w-full"
-                  placeholder="Your Name"
                 />
-              </div>
-              <div>
-                <label htmlFor="email" className="label">
-                  <span className="label-text text-base-content">Email address</span>
-                </label>
-                <input
-                  id="email"
+                <FormInput
+                  label="Email Address"
                   name="email"
                   type="email"
-                  autoComplete="email"
+                  placeholder="alex@example.com"
                   required
-                  className="input input-bordered w-full"
-                  placeholder="you@example.com"
                 />
-              </div>
-              <div>
-                <label htmlFor="subject" className="label">
-                  <span className="label-text text-base-content">Subject</span>
-                </label>
-                <input
-                  id="subject"
+                <FormInput
+                  label="Subject"
                   name="subject"
-                  type="text"
+                  placeholder="Question about group ordering"
                   required
-                  className="input input-bordered w-full"
-                  placeholder="Subject of your inquiry"
                 />
-              </div>
-              <div>
-                <label htmlFor="message" className="label">
-                  <span className="label-text text-base-content">Message</span>
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows="4"
-                  required
-                  className="textarea textarea-bordered w-full"
-                  placeholder="Your message..."
-                ></textarea>
-              </div>
-              <div>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <div>
+                  <label className="label text-xs font-semibold text-base-content">
+                    Message
+                  </label>
+                  <textarea
+                    name="message"
+                    rows={4}
+                    required
+                    className="textarea textarea-bordered w-full rounded-xl text-xs bg-base-100"
+                    placeholder="Tell us how we can help..."
+                  />
+                </div>
+
+                <Button
                   type="submit"
-                  className="btn btn-primary w-full py-3 text-lg font-semibold"
+                  variant="primary"
+                  className="w-full py-3.5 rounded-xl font-bold text-sm shadow-xs mt-2"
                 >
                   Send Message
-                </motion.button>
+                </Button>
+              </form>
+            </div>
+
+            {/* Sidebar Details */}
+            <div className="md:col-span-5 space-y-6">
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-base-200 shadow-xs">
+                <h3 className="font-heading text-xl font-bold text-base-content mb-4">
+                  Direct Contact
+                </h3>
+                <div className="space-y-3 text-xs font-body text-neutral">
+                  <p>
+                    <strong className="text-base-content font-semibold block mb-0.5">Email Support:</strong>
+                    <a href="mailto:contact@orderly.com" className="text-primary hover:underline font-mono">
+                      contact@orderly.com
+                    </a>
+                  </p>
+                  <p>
+                    <strong className="text-base-content font-semibold block mb-0.5">Phone:</strong>
+                    <span className="font-mono">+2 123 456 7890</span>
+                  </p>
+                </div>
               </div>
-            </form>
-          </motion.div>
 
-
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-            className="space-y-6"
-          >
-            <div className="card bg-base-100 shadow-xl p-6">
-              <h3 className="text-2xl font-bold text-secondary mb-4">Other Ways to Reach Us</h3>
-              <p className="text-base-content mb-2">
-                <strong className="font-semibold">Email:</strong> <a href="mailto:contact@orderly.com" className="link link-hover text-accent">contact@orderly.com</a>
-              </p>
-              <p className="text-base-content">
-                <strong className="font-semibold">Phone:</strong> +2 123 456 7890
-              </p>
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-base-200 shadow-xs">
+                <h3 className="font-heading text-xl font-bold text-base-content mb-3">
+                  Development Team
+                </h3>
+                <p className="text-xs text-neutral mb-3">
+                  Crafted by Team 4A for seamless group dining collaboration:
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-base-content">
+                  <div className="p-2.5 bg-base-200/50 rounded-xl">Ahmed Gamal</div>
+                  <div className="p-2.5 bg-base-200/50 rounded-xl">Ahmed Yasser</div>
+                  <div className="p-2.5 bg-base-200/50 rounded-xl">Ahmed Bakr</div>
+                  <div className="p-2.5 bg-base-200/50 rounded-xl">Ahmed Adel</div>
+                </div>
+              </div>
             </div>
-
-            <div className="card bg-base-100 shadow-xl p-6">
-              <h3 className="text-2xl font-bold text-secondary mb-4">Meet Team 4A</h3>
-              <p className="text-base-content mb-4">
-                Our dedicated team is here to assist you. Feel free to reach out to any of our members:
-              </p>
-              <ul className="list-disc list-inside text-base-content space-y-2">
-                <li>Ahmed Gamal</li>
-                <li>Ahmed Yasser</li>
-                <li>Ahmed Bakr</li>
-                <li>Ahmed Adel</li>
-              </ul>
-            </div>
-          </motion.div>
+          </div>
         </div>
-      </motion.div>
-    </motion.div>
+      </Container>
+    </div>
   );
 };
 

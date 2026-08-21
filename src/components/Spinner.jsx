@@ -1,18 +1,13 @@
-import "./spinner.css";
+import "./Spinner.css";
 
 export default function Spinner() {
   return (
-    <div className="flex justify-center items-center h-screen absolute top-0 left-0 bg-black/50 w-full">
-      <div class="sk-cube-grid">
-        <div class="sk-cube sk-cube1"></div>
-        <div class="sk-cube sk-cube2"></div>
-        <div class="sk-cube sk-cube3"></div>
-        <div class="sk-cube sk-cube4"></div>
-        <div class="sk-cube sk-cube5"></div>
-        <div class="sk-cube sk-cube6"></div>
-        <div class="sk-cube sk-cube7"></div>
-        <div class="sk-cube sk-cube8"></div>
-        <div class="sk-cube sk-cube9"></div>
+    <div className="flex justify-center items-center fixed inset-0 bg-black bg-opacity-50 z-50">
+      <div className="ripple-spinner">
+        <div className="ripple-dot"></div>
+        <div className="ripple-circle"></div>
+        <div className="ripple-circle"></div>
+        <div className="ripple-circle"></div>
       </div>
     </div>
   );

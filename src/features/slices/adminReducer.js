@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, current } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { api } from '../../Firebase/api_util';
 
 const initialState = {
@@ -28,6 +28,13 @@ const adminSlice = createSlice({
   reducers: {
     setAdmin: (state, action) => {
       state.id = action.payload.id;
+    },
+    clearAdmin: (state) => {
+      state.id = 0;
+      state.currentSpace = -1;
+      state.currentOrder = -1;
+      state.spaces = [];
+      state.orders = [];
     },
     addSpaceToAdmin: (state, action) => {
       state.spaces.push(action.payload.spaceId);
@@ -63,6 +70,6 @@ const adminSlice = createSlice({
 });
 
 // Export actions matching the reducer names exactly:
-export const { setAdmin, addSpaceToAdmin, addOrderToAdmin, setCurrentOrder, setCurrentSpace } = adminSlice.actions;
+export const { setAdmin, clearAdmin, addSpaceToAdmin, addOrderToAdmin, setCurrentOrder, setCurrentSpace } = adminSlice.actions;
 
 export default adminSlice.reducer;

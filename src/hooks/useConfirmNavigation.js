@@ -8,7 +8,7 @@ const useConfirmNavigation = (message = "Are you sure?", when = true) => {
   useEffect(() => {
     if (!when) return;
 
-    const handlePopState = (event) => {
+    const handlePopState = () => {
       const confirmLeave = window.confirm(message);
       if (confirmLeave) {
         navigate("/", { replace: true }); // Navigate to Auth/Login

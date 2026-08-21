@@ -1,27 +1,27 @@
 const Table = ({ headers, data }) => {
   return (
-    <div className="overflow-x-auto rounded-box shadow-sm border border-base-300 max-w-6xl mx-auto p-4">
-      <table className="table w-full text-base text-base-content text-center">
-        <thead className="bg-base-200 text-base-content">
+    <div className="overflow-x-auto rounded-lg border border-base-200">
+      <table className="table w-full text-base text-base-content">
+        <thead className="bg-base-200">
           <tr>
             {headers.map((header) => (
               <th
                 key={header.key}
-                className="px-4 py-3 font-semibold tracking-wide"
+                className="px-6 py-3 text-left font-body font-semibold text-neutral uppercase tracking-wider"
               >
                 {header.label}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="bg-base-100 text-base-content">
+        <tbody className="bg-white">
           {data.map((row, i) => (
             <tr
               key={i}
-              className={i % 2 === 0 ? "bg-base-100" : "bg-base-200"}
+              className={i % 2 === 0 ? "bg-white" : "bg-base-100"}
             >
               {headers.map((header) => (
-                <td key={header.key} className="px-4 py-3">
+                <td key={header.key} className="px-6 py-4 whitespace-nowrap font-body text-base-content">
                   {row[header.key]}
                 </td>
               ))}

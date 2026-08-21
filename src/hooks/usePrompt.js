@@ -6,7 +6,7 @@ const usePrompt = (shouldPrompt) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handlePopState = (event) => {
+    const handlePopState = () => {
       console.log("Back button clicked");
       if (shouldPrompt) {
         const confirmed = window.confirm("Do you want to log out?");

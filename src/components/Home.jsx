@@ -11,7 +11,7 @@ export default function Home() {
   console.log("Current admin id:", admin.id);
   // console.log("Current Firebase user id:", api.auth.);
 
-  const handleClick = async (e) => {
+  const handleClick = async () => {
     const staticNewSpace = {
       name: "pizzaHut order",
       adminId: admin.id,
@@ -24,10 +24,10 @@ export default function Home() {
     // dispatch(createSpace(staticNewSpace));
   };
   const showSpaces = async () => {
-    const adminSpaces = await api.order.getSpacesByAdmin(admin.id);
+    await api.order.getSpacesByAdmin(admin.id);
   };
   const showOrders = async () => {
-    const adminFavOrders = await api.order.getFavouritesOrders(admin.id);
+    await api.order.getFavouritesOrders(admin.id);
   };
   const addItem = async () => {
     //

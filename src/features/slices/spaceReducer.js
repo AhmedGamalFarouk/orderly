@@ -22,10 +22,9 @@ const initialState = {
 
 export const createNewSpace = createAsyncThunk(
   'space/createNewSpace',
-  async (newSpace, thunkAPI) => {
+  async ({ space, menuItems }, thunkAPI) => {
     try {
-      const space = await api.space.createSpace(newSpace);
-      return space; // Assuming createSpace returns the new space object or ID
+      return await api.space.createSpaceWithMenu(space, menuItems);
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
@@ -63,7 +62,7 @@ const spaceSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(createNewSpace.pending, (state) => {
+      .addCase(createNewSpace.pending, () => {
         console.log('Creating new space...');
       })
       .addCase(createNewSpace.fulfilled, (state, action) => {

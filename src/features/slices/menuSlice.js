@@ -1,9 +1,5 @@
 // src/features/slices/menuSlice.js
-import {
-  asyncThunkCreator,
-  createAsyncThunk,
-  createSlice,
-} from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { api } from "../../Firebase/api_util";
 /**
  * Redux slice for managing menu-related state, including favourite menus.

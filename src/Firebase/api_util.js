@@ -1,7 +1,6 @@
 import {
   doc,
   setDoc,
-  serverTimestamp,
   collection,
   getDoc,
   getDocs,
@@ -10,6 +9,8 @@ import {
   query,
   where,
   addDoc,
+  writeBatch,
+  runTransaction,
 } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
@@ -20,6 +21,7 @@ import {
   browserSessionPersistence,
   setPersistence,
   sendEmailVerification,
+  fetchSignInMethodsForEmail,
 } from "firebase/auth";
 
 import { auth, provider, db } from "../Firebase/config"; // Ensure `provider` is the Google provider
@@ -29,6 +31,9 @@ import {
   PARTICIPANTS_TBL,
   SPACES_TBL,
 } from "../Firebase/tables";
+
+const participantWriteQueues = new Map();
+
 export const api = {
   auth: {
     // Email Sign-Up
@@ -45,7 +50,10 @@ export const api = {
 
       return userCredential; // You can also return a success message if needed
     },
-    isInUse: async (email) => {},
+    isInUse: async (email) => {
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      return methods.length > 0;
+    },
     isValidFormat: (email) => {
       return String(email)
         ?.toLowerCase()
@@ -53,10 +61,22 @@ export const api = {
           /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
         );
     },
-    resendVerification: async () => {
-      const user = auth.currentUser;
-      if (user && !user.emailVerified) {
+    resendVerification: async (email, password) => {
+      let user = auth.currentUser;
+      let temporarySession = false;
+
+      if (!user && email && password) {
+        const credential = await signInWithEmailAndPassword(auth, email, password);
+        user = credential.user;
+        temporarySession = true;
+      }
+
+      try {
+        if (!user) throw new Error("Sign in first to resend verification.");
+        if (user.emailVerified) throw new Error("This email is already verified.");
         await sendEmailVerification(user);
+      } finally {
+        if (temporarySession) await auth.signOut();
       }
     },
     // Email Login with Remember Me option
@@ -114,6 +134,31 @@ export const api = {
       };
     },
 
+    createSpaceWithMenu: async (newSpace, menuItems) => {
+      if (!Array.isArray(menuItems) || menuItems.length === 0 || menuItems.length > 499) {
+        throw new Error("A space must contain between 1 and 499 menu items.");
+      }
+      const newSpaceDoc = doc(collection(db, SPACES_TBL));
+      const spaceId = newSpaceDoc.id;
+      const spaceData = {
+        ...newSpace,
+        createdAt: new Date().toISOString(),
+        orders: [],
+        adminId: newSpace.adminId,
+        status: "active",
+      };
+      const batch = writeBatch(db);
+      batch.set(newSpaceDoc, spaceData);
+      menuItems.forEach((item, index) => {
+        batch.set(
+          doc(db, SPACES_TBL, spaceId, MENUEITEMS_TBL, `${spaceId}-${index}`),
+          { ...item, quantity: 0 }
+        );
+      });
+      await batch.commit();
+      return { id: spaceId, ...spaceData };
+    },
+
     // Add a menu item to a space
     addMenuItem: async (spaceId, itemId, itemData) => {
       await setDoc(
@@ -140,6 +185,7 @@ export const api = {
       // Add the document and get its reference
       const newParticipantDoc = {
         name,
+        spaceId,
         joinedAt: new Date().toISOString(),
         selectedItems: [],
       };
@@ -155,7 +201,7 @@ export const api = {
       const snapshot = await getDocs(
         collection(db, SPACES_TBL, spaceId, PARTICIPANTS_TBL)
       );
-      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      return snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
     },
 
     // Get all menu items in a space
@@ -163,7 +209,16 @@ export const api = {
       const snapshot = await getDocs(
         collection(db, SPACES_TBL, spaceId, MENUEITEMS_TBL)
       );
-      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      return snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          ...data,
+          id: doc.id,
+          // Older documents stored an application-generated numeric id in the
+          // payload. Keep it available while new code uses the document id.
+          legacyId: data.id,
+        };
+      });
     },
 
     // Get details of a specific space
@@ -199,7 +254,11 @@ export const api = {
 
         favouriteMenuItems.push({
           id: space.id,
-          name: space.spaceName || space.name || "Unnamed Menu", // fallback if no name
+          name:
+            space.favouriteMenuName ||
+            space.spaceName ||
+            space.name ||
+            "Unnamed Menu",
           items: menuItems.map((item) => ({
             name: item.name,
             price: item.price,
@@ -279,18 +338,47 @@ export const api = {
       if (!Array.isArray(selectedItems)) {
         selectedItems = []; // ✅ fallback to valid value
       }
-      await setDoc(
+      const key = `${spaceId}:${participantId}`;
+      const previous = participantWriteQueues.get(key) || Promise.resolve();
+      const queuedWrite = previous.catch(() => undefined).then(() => setDoc(
         ref,
         {
+          spaceId,
           selectedItems,
           updatedAt: new Date().toISOString(),
         },
         { merge: true }
-      );
+      ));
+      participantWriteQueues.set(key, queuedWrite);
+      try {
+        await queuedWrite;
+      } finally {
+        if (participantWriteQueues.get(key) === queuedWrite) {
+          participantWriteQueues.delete(key);
+        }
+      }
     },
   },
 
   order: {
+    finalizeSpace: async (spaceId, finalizedOrder) => {
+      const spaceRef = doc(db, SPACES_TBL, spaceId);
+      await runTransaction(db, async (transaction) => {
+        const spaceSnapshot = await transaction.get(spaceRef);
+        if (!spaceSnapshot.exists()) throw new Error("Ordering space not found.");
+        const spaceData = spaceSnapshot.data();
+        if (spaceData.status === "finalized" || spaceData.finalizedOrder) {
+          throw new Error("This ordering space is already finalized.");
+        }
+
+        transaction.update(spaceRef, {
+          finalizedOrder,
+          total: Number(finalizedOrder.grandTotal) || 0,
+          status: "finalized",
+          finalizedAt: new Date().toISOString(),
+        });
+      });
+    },
     // Get all orders in a space (for admin or participants)
     // getAllOrders: async (spaceId) => {
     //   const snapshot = await getDocs(collection(db, SPACES_TBL, spaceId, 'orders'));
@@ -301,7 +389,14 @@ export const api = {
         query(collection(db, SPACES_TBL), where("adminId", "==", adminId))
       );
 
-      return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      return querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          ...data,
+          id: doc.id,
+          total: data.total ?? data.finalizedOrder?.grandTotal ?? 0,
+        };
+      });
     },
     getAllOrders: async (adminId) => {
       const spaces = await api.order.getSpacesByAdmin(adminId);
@@ -312,7 +407,9 @@ export const api = {
         result.push({
           spaceId: space.id,
           createdAt: space.createdAt,
-          spaceName: space.name,
+          spaceName: space.spaceName || space.name || "Unnamed Space",
+          restaurantName: space.restaurantName || "",
+          isFavourite: space.isFavourite === true,
           orders: orders,
         });
       }
@@ -330,12 +427,23 @@ export const api = {
   utils: {
     // Delete a space (admin use only — optional)
     deleteSpace: async (spaceId) => {
-      await deleteDoc(doc(db, "spaces", spaceId));
+      for (const subcollection of [MENUEITEMS_TBL, PARTICIPANTS_TBL]) {
+        const snapshot = await getDocs(collection(db, SPACES_TBL, spaceId, subcollection));
+        for (let start = 0; start < snapshot.docs.length; start += 500) {
+          const batch = writeBatch(db);
+          snapshot.docs.slice(start, start + 500).forEach((child) => batch.delete(child.ref));
+          await batch.commit();
+        }
+      }
+      await deleteDoc(doc(db, SPACES_TBL, spaceId));
     },
 
     // Update space name (optional)
     updateSpaceName: async (spaceId, newName) => {
-      await updateDoc(doc(db, "spaces", spaceId), { name: newName });
+      await updateDoc(doc(db, SPACES_TBL, spaceId), {
+        spaceName: newName,
+        name: newName,
+      });
     },
   },
 };

@@ -11,7 +11,7 @@ export default function SignUp() {
 
   const navigate = useNavigate();
   const [error, setError] = useState("");
-  const [emailError, setEmailError] = useState("");
+  const [emailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmError, setConfirmError] = useState("");
   const handleSignUp = async (e) => {
@@ -24,7 +24,7 @@ export default function SignUp() {
     }
 
     try {
-      const userCredential = await api.auth.signUp(email, password);
+      await api.auth.signUp(email, password);
 
       handleSuccess();
 

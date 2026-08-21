@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @plugin "daisyui";
 
@@ -7,26 +8,26 @@
   default: false;
   prefersdark: false;
   color-scheme: "light";
-  --color-base-100: oklch(98% 0.016 73.684);
-  --color-base-200: oklch(95% 0.038 75.164);
-  --color-base-300: oklch(90% 0.076 70.697);
-  --color-base-content: oklch(40% 0.123 38.172);
-  --color-primary: oklch(0% 0 0);
-  --color-primary-content: oklch(100% 0 0);
-  --color-secondary: oklch(22.45% 0.075 37.85);
-  --color-secondary-content: oklch(90% 0.076 70.697);
-  --color-accent: oklch(46.44% 0.111 37.85);
-  --color-accent-content: oklch(90% 0.076 70.697);
-  --color-neutral: oklch(40% 0.123 38.172);
-  --color-neutral-content: oklch(80% 0.114 19.571);
-  --color-info: oklch(42% 0.199 265.638);
-  --color-info-content: oklch(90% 0.076 70.697);
-  --color-success: oklch(43% 0.095 166.913);
-  --color-success-content: oklch(90% 0.076 70.697);
-  --color-warning: oklch(82% 0.189 84.429);
-  --color-warning-content: oklch(41% 0.112 45.904);
-  --color-error: oklch(70% 0.191 22.216);
-  --color-error-content: oklch(39% 0.141 25.723);
+  --color-base-100: #F8F8F8; /* Off-white/Light Grey */
+  --color-base-200: #E0E0E0; /* Light Grey */
+  --color-base-300: #CCCCCC; /* Slightly darker grey for subtle depth */
+  --color-base-content: #333333; /* Dark Charcoal for primary text */
+  --color-primary: #FF6B6B; /* Primary Accent (Coral/Salmon) */
+  --color-primary-content: #FFFFFF; /* White for text on primary */
+  --color-secondary: #4ECDC4; /* Secondary Accent (Teal) */
+  --color-secondary-content: #FFFFFF; /* White for text on secondary */
+  --color-accent: #FF6B6B; /* Using primary accent for general accent */
+  --color-accent-content: #FFFFFF;
+  --color-neutral: #666666; /* Medium Grey for secondary text/neutral elements */
+  --color-neutral-content: #FFFFFF;
+  --color-info: #2196F3; /* Standard blue for info */
+  --color-info-content: #FFFFFF;
+  --color-success: #8BC34A; /* Soft Green */
+  --color-success-content: #FFFFFF;
+  --color-warning: #FFC107; /* Warm Yellow */
+  --color-warning-content: #333333; /* Dark text on warning */
+  --color-error: #EF5350; /* Standard red for error */
+  --color-error-content: #FFFFFF;
   --radius-selector: 2rem;
   --radius-field: 0.5rem;
   --radius-box: 1rem;
@@ -36,6 +37,51 @@
   --depth: 0.5;
   --noise: 1;
 }
-body {
-  font-family: "Inter", sans-serif;
+:root {
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
 }
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-base-content);
+  background-color: var(--color-base-100);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--color-base-content);
+}
+
+.card-surface {
+  background-color: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 1rem;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-tactile {
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease;
+}
+
+.btn-tactile:active {
+  transform: scale(0.97);
+}
+
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+

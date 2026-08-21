@@ -11,17 +11,25 @@ export const collectiveOrdersSlice = createSlice({
   },
   reducers: {
     setCollectiveOrders: (state, action) => {
-      state.orders = action.payload;
+      const orders = Array.isArray(action.payload) ? action.payload : [];
+      state.orders = orders;
+      state.grandTotal = 0;
 
       // Compute summary
       const summary = {};
-      action.payload.forEach(order => {
-        order.selectedItems.forEach(item => {
+      orders.forEach(order => {
+        const selectedItems = Array.isArray(order?.selectedItems)
+          ? order.selectedItems
+          : [];
+        selectedItems.forEach(item => {
+          if (!item || item.id === undefined) return;
           if (!summary[item.id]) {
             summary[item.id] = 0;
           }
-          summary[item.id] += item.qty;
-          state.grandTotal += item.qty * item.price; // Assuming each item has a price property
+          const quantity = Number(item.qty) || 0;
+          const price = Number(item.price) || 0;
+          summary[item.id] += quantity;
+          state.grandTotal += quantity * price;
 
         });
       });
@@ -30,6 +38,7 @@ export const collectiveOrdersSlice = createSlice({
     clearCollectiveOrders: (state) => {
       state.orders = [];
       state.summary = {};
+      state.grandTotal = 0;
     },
   },
 });

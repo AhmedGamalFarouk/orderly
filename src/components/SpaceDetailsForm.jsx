@@ -1,6 +1,5 @@
 import React from "react";
 import FormInput from "./FormInput";
-import FormActionButtons from "./FormActionButtons";
 
 const SpaceDetailsForm = ({
   spaceName,
@@ -11,11 +10,11 @@ const SpaceDetailsForm = ({
   setRestaurantName,
 }) => {
   return (
-    <div className="card bg-base-200 shadow-sm p-6 rounded-box">
-      <div className="card-body p-0">
-        <div className="head">
-          <h2 className="card-title text-2xl mb-4">Space Details</h2>
-        </div>
+    <div className="bg-base-100 shadow-sm p-6 rounded-xl">
+      <div className="head">
+        <h2 className="font-heading text-2xl text-base-content mb-6">Space Details</h2>
+      </div>
+      <div className="flex flex-col gap-4">
         <FormInput
           label="Space Name"
           placeholder="e.g., Team Lunch Order"

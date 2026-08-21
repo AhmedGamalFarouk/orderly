@@ -12,7 +12,9 @@ const handleError = (error) => {
   Swal.fire({
     icon: "error",
     title: "Oops...",
-    text: error.message || "Something went wrong!",
+    text: typeof error === "string"
+      ? error
+      : error?.message || "Something went wrong!",
   });
 };
 const handleWarning = () => {

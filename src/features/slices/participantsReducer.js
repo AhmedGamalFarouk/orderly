@@ -16,15 +16,20 @@ export const fetchParticipants = createAsyncThunk(
   }
 );
 export const listenToParticipants = (spaceId) => (dispatch) => {
+  // Prevent a previous room's participants from being used while the new
+  // room's first snapshot is still loading.
+  dispatch(setParticipants([]));
   const ref = collection(db, "spaces", spaceId, "participants");
 
   const unsubscribe = onSnapshot(ref, (snapshot) => {
     const participants = snapshot.docs.map((doc) => ({
-      id: doc.id,
       ...doc.data(),
+      id: doc.id,
     }));
 
     dispatch(setParticipants(participants));
+  }, (error) => {
+    console.error("Failed to listen to participants:", error);
   });
 
   return unsubscribe;
@@ -117,7 +122,7 @@ const participantsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(addNewParticipant.pending, (state) => {
+      .addCase(addNewParticipant.pending, () => {
         // Optionally handle loading state
         console.log('Adding new participant...');
       })
@@ -129,12 +134,12 @@ const participantsSlice = createSlice({
             selectedItems: [], // Array of { itemId, quantity }
           });
         }
-      }).addCase(addNewParticipant.rejected, (state, action) => {
+      }).addCase(addNewParticipant.rejected, (_, action) => {
         console.error("Failed to add participant:", action.payload);
       })
 
 
-      .addCase(fetchParticipants.pending, (state) => {
+      .addCase(fetchParticipants.pending, () => {
         // Optionally handle loading state
         console.log("Fetching participants...");
       })
@@ -142,15 +147,15 @@ const participantsSlice = createSlice({
         console.log("Participants fetched successfully:", action.payload);
         return action.payload; // Replace the state with fetched participants
       })
-      .addCase(fetchParticipants.rejected, (state, action) => {
+      .addCase(fetchParticipants.rejected, (_, action) => {
         console.error("Failed to fetch participants:", action.payload);
       })
 
-      .addCase(saveParticipantOrder.pending, (state) => {
+      .addCase(saveParticipantOrder.pending, () => {
         // Optionally handle loading state
         console.log("Saving participant order...");
       })
-      .addCase(saveParticipantOrder.fulfilled, (state, action) => {
+      .addCase(saveParticipantOrder.fulfilled, () => {
         // Handle successful order save if needed
         console.log("Participant order saved successfully");
       })

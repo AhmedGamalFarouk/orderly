@@ -1,152 +1,96 @@
 import React from 'react';
 import Container from '../components/Container';
-import { motion } from 'framer-motion';
+import { SparklesIcon, UsersIcon, ReceiptIcon } from '../assets/icons/icons';
 
-// Helper for icons to keep the main component clean
 const CheckCircleIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 
 const AboutUsPage = () => {
   const features = [
-    { text: 'Effortless order creation for any group.' },
-    { text: 'Real-time collaboration to see selections live.' },
-    { text: 'Personalized selections for every participant.' },
-    { text: 'A clear, consolidated overview of the entire order.' },
-    { text: 'Simple finalization and status tracking.' },
-    { text: 'An intuitive, user-friendly interface.' },
+    { title: 'Instant Room Creation', text: 'Spin up a shareable order space in 10 seconds.' },
+    { title: 'Live Realtime Sync', text: 'Watch teammates add items to the collective order live.' },
+    { title: 'Personal Selections', text: 'Every participant maintains their individual bill.' },
+    { title: 'Consolidated Kitchen View', text: 'Restaurant summary automatically totals quantities.' },
+    { title: 'Smart Bill Splitting', text: 'Evenly or proportionally split delivery fees and tips.' },
+    { title: 'One-Click Multi-Sharing', text: 'Export receipt summaries directly to WhatsApp or Slack.' },
   ];
 
   return (
-    <Container>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        {/* Hero Section */}
-        <motion.div
-          className="hero min-h-96 bg-base-200 rounded-box mb-8"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <div className="hero-content text-center">
-            <div className="max-w-md">
-              <motion.h1
-                className="text-5xl font-bold text-primary"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                About Orderly
-              </motion.h1>
-              <motion.p
-                className="py-6 text-lg text-base-content"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-              >
-                Your ultimate solution for simplifying group orders, making collaboration effortless and enjoyable.
-              </motion.p>
+    <div className="min-h-[calc(100vh-4rem)] bg-base-100 py-12">
+      <Container>
+        <div className="max-w-4xl mx-auto space-y-10 animate-fade-in-up">
+          {/* Hero Banner */}
+          <div className="bg-white rounded-3xl p-8 sm:p-12 border border-base-200 shadow-xs text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold mb-3">
+              <SparklesIcon className="w-3.5 h-3.5" />
+              <span>About Orderly</span>
+            </div>
+            <h1 className="font-heading text-4xl sm:text-5xl font-extrabold text-base-content tracking-tight mb-3">
+              Group Dining, Simplified.
+            </h1>
+            <p className="font-body text-base text-neutral max-w-xl mx-auto">
+              The modern way for teams, friends, and families to coordinate food orders without confusing chat threads or messy bill calculations.
+            </p>
+          </div>
+
+          {/* Mission & Key Features Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white p-8 rounded-3xl border border-base-200 shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="p-3 bg-primary/10 text-primary rounded-2xl w-fit mb-4">
+                  <UsersIcon className="w-6 h-6" />
+                </div>
+                <h2 className="font-heading text-2xl font-bold text-base-content mb-2">
+                  Our Mission
+                </h2>
+                <p className="font-body text-sm text-neutral leading-relaxed">
+                  Collecting group orders usually involves messy screenshots, lost notes, and awkward bill math. Orderly streamlines the process from live item picking to consolidated kitchen totals and transparent bill splitting.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white p-8 rounded-3xl border border-base-200 shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="p-3 bg-secondary/10 text-secondary rounded-2xl w-fit mb-4">
+                  <ReceiptIcon className="w-6 h-6" />
+                </div>
+                <h2 className="font-heading text-2xl font-bold text-base-content mb-2">
+                  Why Orderly?
+                </h2>
+                <p className="font-body text-sm text-neutral leading-relaxed">
+                  Real-time sync ensures no duplicate orders or missed dietary customizations. With flexible bill splitting, hosts and participants always have crystal-clear receipts.
+                </p>
+              </div>
             </div>
           </div>
-        </motion.div>
 
-        {/* Main Content Card */}
-        <motion.div
-          className="card bg-base-100 shadow-xl p-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-        >
-          <div className="card-body p-0">
-            <motion.h2
-              className="text-3xl font-bold text-secondary mb-4"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 1.0 }}
-            >
-              Our Mission
-            </motion.h2>
-            <motion.p
-              className="text-base-content/80 mb-6 leading-relaxed"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 1.2 }}
-            >
-              Orderly is your go-to application for simplifying group orders. Whether you're
-              ordering food with friends, coordinating a team lunch, or managing a collective
-              purchase, Orderly makes it easy to gather everyone's selections and finalize
-              the order without the usual hassle. We aim to streamline the entire process,
-              from initial selection to finalization, ensuring a smooth and stress-free experience
-              for everyone involved.
-            </motion.p>
-
-            <div className="divider my-6"></div>
-
-            <motion.h2
-              className="text-3xl font-bold text-secondary mb-4"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 1.4 }}
-            >
-              Key Features
-            </motion.h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Features Grid */}
+          <div className="bg-white p-8 sm:p-10 rounded-3xl border border-base-200 shadow-xs">
+            <h2 className="font-heading text-2xl font-bold text-base-content mb-6 text-center">
+              Core Capabilities
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {features.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  className="flex items-start space-x-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 1.6 + index * 0.1 }}
-                >
-                  <div className="flex-shrink-0 mt-1">
+                <div key={index} className="p-4 bg-base-200/40 rounded-2xl border border-base-200/60">
+                  <div className="flex items-center gap-2 mb-1.5">
                     <CheckCircleIcon />
+                    <h3 className="font-heading text-base font-bold text-base-content">
+                      {feature.title}
+                    </h3>
                   </div>
-                  <p className="text-base-content text-lg">{feature.text}</p>
-                </motion.div>
+                  <p className="font-body text-xs text-neutral pl-7">
+                    {feature.text}
+                  </p>
+                </div>
               ))}
             </div>
-
-            <div className="divider my-6"></div>
-
-            <motion.h2
-              className="text-3xl font-bold text-secondary mb-4"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 2.0 }}
-            >
-              How It Works
-            </motion.h2>
-            <ol className="list-decimal list-inside text-base-content space-y-4 text-lg">
-              {['Create a New Space', 'Invite Participants', 'Add Your Items', 'Review the Collective Order', 'Finalize & Enjoy'].map((step, index) => (
-                <motion.li
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 2.2 + index * 0.1 }}
-                >
-                  <strong className="text-base-content">{step.split(':')[0]}:</strong> {step.split(':')[1] || ''}
-                </motion.li>
-              ))}
-            </ol>
-
-            <motion.p
-              className="text-base-content/80 mt-10 text-center italic text-lg"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 2.8 }}
-            >
-              Orderly is designed to take the stress out of group ordering, so you can focus on what matters most – enjoying your meal with others.
-            </motion.p>
           </div>
-        </motion.div>
-      </motion.div>
-    </Container>
+        </div>
+      </Container>
+    </div>
   );
 };
 

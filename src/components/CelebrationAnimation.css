@@ -1,0 +1,59 @@
+/* Celebration Animation */
+.celebration-container {
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-base-100); /* Light background */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.celebration-message {
+  font-family: var(--font-heading);
+  font-size: 3rem; /* 48px */
+  color: var(--color-primary);
+  text-align: center;
+  opacity: 0;
+  animation: fadeInScale 1s ease-out forwards 1.5s; /* Delay after avatars */
+  position: relative;
+  z-index: 101;
+}
+
+.celebration-avatar {
+  position: absolute;
+  animation: floatAndConverge 2s ease-out forwards;
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+/* Define initial positions for avatars (randomized or specific corners) */
+/* These will be overridden by inline styles in JSX for more control */
+
+@keyframes floatAndConverge {
+  0% {
+    opacity: 0;
+    transform: translate(var(--initial-x), var(--initial-y)) scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.2); /* Briefly larger in center */
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--final-x), var(--final-y)) scale(0.8); /* Fade out slightly off-center */
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

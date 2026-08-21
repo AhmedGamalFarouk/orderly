@@ -10,11 +10,12 @@ import MenuSetupTabs from "../components/MenuSetupTabs";
 import CreateNewMenuSection from "../components/CreateNewMenuSection";
 import FavouriteMenuSection from "../components/FavouriteMenuSection";
 import FormActionButtons from "../components/FormActionButtons";
+import { SparklesIcon } from "../assets/icons/icons";
 
 // features
 import { createNewSpace } from "../features/slices/spaceReducer";
 import { setCurrentSpace } from "../features/slices/adminReducer";
-import { api } from "../Firebase/api_util";
+import { handleError } from "../components/alerts";
 
 const CreateSpacePage = () => {
   const [spaceName, setSpaceName] = useState("");
@@ -28,6 +29,8 @@ const CreateSpacePage = () => {
   const [saveAsFavourite, setSaveAsFavourite] = useState(false);
   const [favouriteMenuName, setFavouriteMenuName] = useState("");
   const [selectedFavouriteMenu, setSelectedFavouriteMenu] = useState("");
+  const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -35,7 +38,7 @@ const CreateSpacePage = () => {
   const favouriteMenus = useSelector((state) => state.menu.favouriteMenus);
 
   useEffect(() => {
-    dispatch(fetchFavouriteMenus(admin.id)); // Fetch favourite menus for the admin
+    dispatch(fetchFavouriteMenus(admin.id));
   }, [dispatch, admin.id]);
 
   const handleAddMenuItem = () => {
@@ -57,8 +60,22 @@ const CreateSpacePage = () => {
     );
   };
 
+  const handleApplyPreset = (presetItems) => {
+    const formatted = presetItems.map((p, idx) => ({
+      id: Date.now() + idx,
+      name: p.name || "",
+      description: p.description || "",
+      price: String(p.price || ""),
+    }));
+    setMenuItems(formatted);
+    if (!restaurantName && presetItems[0]?.name) {
+      setRestaurantName(spaceName || "Selected Restaurant");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError("");
 
     const formData = {
       spaceDetails: {
@@ -73,94 +90,136 @@ const CreateSpacePage = () => {
           saveAsFavourite,
           ...(saveAsFavourite && { favouriteMenuName }),
         }),
-        // Conditionally include selected favourite menu if 'useFavourite'
         ...(menuOption === "useFavourite" && {
           selectedFavouriteMenu,
         }),
       },
     };
 
-    // Dispatch the consolidated form data to Redux for saving.
-    // This would typically trigger an async thunk to an API.
-
-    // dispatch(saveSpaceData(formData));
-    // formData.spaceDetails.adminId = admin.id; // Add admin ID to space details
-    // dispatch(createNewSpace(formData.spaceDetails));
-    // const lastSpace = spaceList.at(-1);
-    // dispatch(setCurrentSpace(lastSpace));
-
-    // Step 1: Extract spaceDetails and menuSetup from formData
     const { spaceDetails, menuSetup } = formData;
 
-    // Step 2: Add admin ID to spaceDetails
-    spaceDetails.adminId = admin.id;
-    spaceDetails.isFavourite = menuSetup.saveAsFavourite || false; // add isFavourite flag
-
-    // Step 3: Dispatch to create the new space and get back the space object
-    const result = await dispatch(createNewSpace(spaceDetails)).unwrap(); // This gives you the actual returned space object
-    const spaceId = result.id;
-
-    // Step 4: Set current space if needed
-    dispatch(setCurrentSpace(result));
-
-    // Step 5: If menuOption is 'createNew', add menu items
-    const itemsCollection =
-      menuSetup.menuOption === "createNew"
-        ? menuSetup.menuItems
-        : favouriteMenus.find((item) => item.id === selectedFavouriteMenu)
-            .items;
-
-    for (let idx = 0; idx < itemsCollection.length; idx++) {
-      const item = itemsCollection[idx];
-      const itemId = `${spaceId}-${idx}`; // or use item.id if available
-      const itemData = {
-        ...item,
-        quantity: 0,
-      };
-      console.log("item data here is   ", itemData);
-      await api.space.addMenuItem(spaceId, itemId, itemData); // Save under /spaces/{spaceId}/menuItems/{itemId}
+    if (!spaceName.trim() || !restaurantName.trim()) {
+      setFormError("Space name and restaurant name are required.");
+      return;
     }
-    navigate("/space/" + spaceId);
+    if (
+      menuOption === "createNew" &&
+      (!menuItems.length ||
+        menuItems.some((item) => {
+          const price = Number(item.price);
+          return (
+            !item.name.trim() ||
+            item.price === "" ||
+            !Number.isFinite(price) ||
+            price < 0
+          );
+        }))
+    ) {
+      setFormError("Every menu item needs a valid name and non-negative price.");
+      return;
+    }
+    if (menuOption === "createNew" && saveAsFavourite && !favouriteMenuName.trim()) {
+      setFormError("Favourite menu name is required to save.");
+      return;
+    }
+    if (menuOption === "useFavourite" && !selectedFavouriteMenu) {
+      setFormError("Please select a favourite menu from your saved list.");
+      return;
+    }
+    const selectedMenu = favouriteMenus.find((item) => item.id === selectedFavouriteMenu);
+    if (menuOption === "useFavourite" && !selectedMenu?.items?.length) {
+      setFormError("The selected favourite menu has no items.");
+      return;
+    }
+    const itemsCollection = menuOption === "createNew" ? menuItems : selectedMenu.items;
+    if (itemsCollection.length > 499) {
+      setFormError("A menu cannot contain more than 499 items.");
+      return;
+    }
+
+    spaceDetails.adminId = admin.id;
+    spaceDetails.isFavourite = menuSetup.saveAsFavourite || false;
+    spaceDetails.favouriteMenuName = menuSetup.favouriteMenuName || "";
+
+    try {
+      setIsSubmitting(true);
+      const result = await dispatch(
+        createNewSpace({ space: spaceDetails, menuItems: itemsCollection })
+      ).unwrap();
+      const spaceId = result.id;
+      dispatch(setCurrentSpace(spaceId));
+      navigate("/space/" + spaceId);
+    } catch (error) {
+      setFormError(error.message || "Could not create space.");
+      handleError(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
-    setSpaceName("");
-    setDescription("");
-    setRestaurantName("");
-    setMenuOption("createNew");
-    setMenuItems([{ id: 1, name: "", description: "", price: "" }]);
-    setSaveAsFavourite(false);
-    setFavouriteMenuName("");
-    setSelectedFavouriteMenu("");
-    console.log("Form cancelled and reset");
     navigate("/home");
   };
 
   return (
-    <div className="bg-base-100 text-base-content my-10">
+    <div className="bg-base-100 min-h-[calc(100vh-4rem)] py-10">
       <Container>
-        <h1 className="text-4xl font-bold mb-8 text-center">
-          Create New Ordering Space
-        </h1>
+        <div className="max-w-3xl mx-auto mb-8 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold mb-2">
+            <SparklesIcon className="w-3.5 h-3.5" />
+            <span>Host Workspace</span>
+          </div>
+          <h1 className="font-heading text-3xl sm:text-4xl font-bold text-base-content">
+            Create Ordering Space
+          </h1>
+          <p className="font-body text-sm text-neutral mt-1">
+            Set up the venue and food items. You'll get a shareable room link instantly.
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-8">
-          <SpaceDetailsForm
-            spaceName={spaceName}
-            setSpaceName={setSpaceName}
-            description={description}
-            setDescription={setDescription}
-            restaurantName={restaurantName}
-            setRestaurantName={setRestaurantName}
-          />
+        {formError && (
+          <div className="max-w-3xl mx-auto mb-6 p-4 bg-error/10 border border-error/20 rounded-2xl text-center">
+            <p role="alert" className="text-error text-sm font-medium">
+              {formError}
+            </p>
+          </div>
+        )}
 
-          <div className="card bg-base-200 shadow-sm p-6 rounded-box">
-            <div className="card-body p-0">
-              <h2 className="card-title text-2xl mb-4">Menu Setup</h2>
-              <MenuSetupTabs
-                menuOption={menuOption}
-                setMenuOption={setMenuOption}
-              />
+        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-6">
+          {/* Step 1: Space Details */}
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-base-200 shadow-xs space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-6 h-6 rounded-full bg-primary text-primary-content text-xs font-bold flex items-center justify-center">
+                1
+              </span>
+              <h2 className="font-heading text-xl font-bold text-base-content">
+                Space & Restaurant Details
+              </h2>
+            </div>
+            <SpaceDetailsForm
+              spaceName={spaceName}
+              setSpaceName={setSpaceName}
+              description={description}
+              setDescription={setDescription}
+              restaurantName={restaurantName}
+              setRestaurantName={setRestaurantName}
+            />
+          </div>
 
+          {/* Step 2: Menu Setup */}
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-base-200 shadow-xs space-y-6">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-primary text-primary-content text-xs font-bold flex items-center justify-center">
+                2
+              </span>
+              <h2 className="font-heading text-xl font-bold text-base-content">
+                Menu Setup
+              </h2>
+            </div>
+
+            <MenuSetupTabs menuOption={menuOption} setMenuOption={setMenuOption} />
+
+            <div className="mt-4">
               {menuOption === "createNew" && (
                 <CreateNewMenuSection
                   menuItems={menuItems}
@@ -171,6 +230,7 @@ const CreateSpacePage = () => {
                   setSaveAsFavourite={setSaveAsFavourite}
                   favouriteMenuName={favouriteMenuName}
                   setFavouriteMenuName={setFavouriteMenuName}
+                  onApplyPreset={handleApplyPreset}
                 />
               )}
 
@@ -181,12 +241,11 @@ const CreateSpacePage = () => {
                   setSelectedFavouriteMenu={setSelectedFavouriteMenu}
                 />
               )}
-              <FormActionButtons onCancel={handleCancel} />
             </div>
           </div>
 
-          {/* Form Action Buttons (Submit and Cancel) */}
-          {/* <FormActionButtons onCancel={handleCancel} /> */}
+          {/* Form Action Buttons */}
+          <FormActionButtons onCancel={handleCancel} isSubmitting={isSubmitting} />
         </form>
       </Container>
     </div>

@@ -5,18 +5,25 @@ const singlemenu = createSlice({
   name: "singlemenu",
   initialState: { arr: [], total: 0, userId: -1 },
   reducers: {
-    setQuantity: (state, payload) => {
-      const { ind, quantity } = payload.payload;
+    resetMenu: () => ({ arr: [], total: 0, userId: -1 }),
+    setQuantity: (state, action) => {
+      const { ind, quantity } = action.payload;
 
       const item = state.arr.find((item, i) => i === ind);
       if (item) {
-        state.total += (quantity - item.quantity) * item.price;
-        item.quantity = quantity;
+        const parsedQuantity = Number(quantity);
+        const nextQuantity = Number.isFinite(parsedQuantity)
+          ? Math.max(0, Math.floor(parsedQuantity))
+          : 0;
+        state.total += (nextQuantity - item.quantity) * item.price;
+        item.quantity = nextQuantity;
       }
     },
-    setMenu: (state, payload) => {
-      const { name, price } = payload.payload;
-      state["arr"].push({ name, price, quantity: 0 });
+    setMenu: (state, action) => {
+      const { id, legacyId, name, description, price, imageUrl } = action.payload;
+      if (!state.arr.some((item) => item.id === id)) {
+        state.arr.push({ id, legacyId, name, description, price: Number(price) || 0, imageUrl, quantity: 0 });
+      }
     },
     setUserId: (state, payload) => {
       state.userId = payload.payload;
@@ -24,6 +31,6 @@ const singlemenu = createSlice({
   },
 });
 
-export const { setMenu, setQuantity, setUserId } = singlemenu.actions;
+export const { resetMenu, setMenu, setQuantity, setUserId } = singlemenu.actions;
 
 export default singlemenu.reducer;

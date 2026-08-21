@@ -1,11 +1,11 @@
 import { useSelector } from "react-redux";
 import { useEffect, useRef } from "react";
 import { debounce } from "lodash";
-import { db } from "../firebase"; // your Firebase config
+import { db } from "../Firebase/config";
 import { doc, setDoc } from "firebase/firestore";
 
 export function useSyncOrderToFirebase(userId) {
-  const order = useSelector((state) => state.singlemenu.arr);
+  const order = useSelector((state) => state.single.arr);
 
   const debouncedPush = useRef(
     debounce(async (data) => {

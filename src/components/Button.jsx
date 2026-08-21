@@ -1,5 +1,5 @@
 
-const Button = ({ children, variant = "primary", onClick, type = "button", className = "" }) => {
+const Button = ({ children, variant = "primary", onClick, type = "button", className = "", disabled = false }) => {
   const variantClass = {
     primary: "btn-primary",
     secondary: "btn-secondary",
@@ -10,6 +10,7 @@ const Button = ({ children, variant = "primary", onClick, type = "button", class
     error: "btn-error",
     neutral: "btn-neutral",
     ghost: "btn-ghost",
+    outline: "btn-outline",
   }[variant];
 
   return (
@@ -17,6 +18,7 @@ const Button = ({ children, variant = "primary", onClick, type = "button", class
       type={type}
       className={`btn ${variantClass} rounded-box px-4 py-2 text-base font-medium ${className}`}
       onClick={onClick}
+      disabled={disabled}
     >
       {children}
     </button>

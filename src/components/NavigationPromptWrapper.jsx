@@ -8,7 +8,7 @@ export default function NavigationPromptWrapper() {
   useEffect(() => {
     console.log("NavigationPromptWrapper mounted");
 
-    const handlePopState = (event) => {
+    const handlePopState = () => {
       console.log("Back button pressed at:", location.pathname);
 
       if (location.pathname === "/home") {

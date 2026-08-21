@@ -1,24 +1,22 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom"; // fix: should be 'react-router-dom'
-import { lazy, Suspense } from "react";
-import { Provider } from "react-redux";
+import { lazy, Suspense, useEffect } from "react";
+import { Provider, useDispatch, useSelector } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
+import { onAuthStateChanged } from "firebase/auth";
 
 // Store
 import { store, persistor } from "./features/store";
 
 // Components
 import Layout from "./components/Layout";
-import Button from "./components/Button";
-import Table from "./components/Table";
 import Auth from "./components/Auth";
-import LoginForm from "./components/LoginForm";
-import Home from "./components/Home";
-import TestDashBoard from "./components/TestDashBoard";
-import UserName from "./components/userNamePopup";
 import Spinner from "./components/Spinner";
+import RequireAuth from "./components/RequireAuth";
+import { auth, isVerifiedUser } from "./Firebase/config";
+import { clearAdmin, setAdmin } from "./features/slices/adminReducer";
+import { clearFinalizedOrder } from "./features/slices/orderSlice";
 
 // Lazy-loaded Pages
-const SignIn = lazy(() => import("./pages/SignIn"));
 const SignUp = lazy(() => import("./pages/SignUp"));
 const Landing = lazy(() => import("./pages/Landing"));
 const SpaceScreen = lazy(() => import("./pages/SpaceScreen"));
@@ -27,6 +25,26 @@ const FinalizedOrderPage = lazy(() => import("./pages/FinalizedOrderPage"));
 const ComponentsTestPage = lazy(() => import("./pages/ComponentsTestPage"));
 const AboutUsPage = lazy(() => import("./pages/AboutUsPage"));
 const ContactUsPage = lazy(() => import("./pages/ContactUsPage"));
+
+function AuthSessionSync() {
+  const dispatch = useDispatch();
+  const adminId = useSelector((state) => state.admin.id);
+
+  useEffect(() => onAuthStateChanged(auth, (user) => {
+    if (isVerifiedUser(user)) {
+      if (adminId && adminId !== 0 && adminId !== user.uid) {
+        dispatch(clearFinalizedOrder());
+      }
+      dispatch(setAdmin({ id: user.uid }));
+    } else {
+      dispatch(clearAdmin());
+      dispatch(clearFinalizedOrder());
+      if (user) auth.signOut();
+    }
+  }), [adminId, dispatch]);
+
+  return null;
+}
 
 function App() {
   const router = createBrowserRouter([
@@ -43,24 +61,32 @@ function App() {
           element: <SignUp />,
         },
         {
-          path: "home",
-          element: <Landing />,
+          path: "signin",
+          element: <Auth />,
         },
         {
-          path: "checkout",
+          path: "home",
+          element: <RequireAuth><Landing /></RequireAuth>,
+        },
+        {
+          path: "checkout/:spaceId",
           element: <SpaceScreen />,
         },
         {
           path: "create-space",
-          element: <CreateSpacePage />,
+          element: <RequireAuth><CreateSpacePage /></RequireAuth>,
+        },
+        {
+          path: "finalized-order/:spaceId",
+          element: <RequireAuth><FinalizedOrderPage /></RequireAuth>,
         },
         {
           path: "finalized-order",
-          element: <FinalizedOrderPage />,
+          element: <RequireAuth><FinalizedOrderPage /></RequireAuth>,
         },
         {
           path: "components-test",
-          element: <ComponentsTestPage />,
+          element: <RequireAuth><ComponentsTestPage /></RequireAuth>,
         },
         {
           path: "space/:spaceId",
@@ -81,6 +107,7 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={<Spinner />} persistor={persistor}>
+        <AuthSessionSync />
         <Suspense fallback={<Spinner />}>
           <RouterProvider router={router} />
         </Suspense>
