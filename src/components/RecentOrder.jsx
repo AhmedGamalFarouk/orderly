@@ -11,6 +11,7 @@ export default function RecentOrder({
   total = 0,
   status = "active",
   hasFinalizedOrder = false,
+  currency,
 }) {
   const navigate = useNavigate();
   const isFinalized = status === "finalized" || hasFinalizedOrder;
@@ -77,7 +78,7 @@ export default function RecentOrder({
             {date}
           </span>
           <span className="font-body text-base font-bold text-primary">
-            {isFinalized ? formatCurrency(total) : "Ordering open"}
+            {isFinalized ? formatCurrency(total, currency) : "Ordering open"}
           </span>
         </div>
 

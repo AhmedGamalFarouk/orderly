@@ -1,8 +1,9 @@
 import { useDispatch, useSelector } from "react-redux";
-import { formatCurrency } from "../../utils/formatCurrency";
+import { useFormatMoney } from "../../utils/currencyContext";
 import { setQuantity } from "../../features/slices/singlemenu";
 
 export default function MySelection() {
+  const formatCurrency = useFormatMoney();
   const { arr, total } = useSelector((state) => state.single);
   const dispatch = useDispatch();
   const selectedItems = arr.filter((item) => item.quantity > 0);

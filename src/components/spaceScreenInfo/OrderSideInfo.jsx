@@ -8,6 +8,7 @@ import { handleError } from "../alerts";
 import { auth } from "../../Firebase/config";
 import { ArrowRightIcon } from "../../assets/icons/icons";
 import { summarizeOrders } from "../../utils/orderSummary";
+import { DEFAULT_CURRENCY } from "../../utils/formatCurrency";
 
 export default function OrderSideInfo({ isFinalized = false, spaceAdminId }) {
   const { spaceId } = useParams();
@@ -68,7 +69,7 @@ export default function OrderSideInfo({ isFinalized = false, spaceAdminId }) {
         throw new Error("Add at least one item before finalizing the order.");
       }
 
-      const finalizedOrder = { spaceId, orderName: space.spaceName || "Order", restaurant: space.restaurantName || "Restaurant", collectiveOrder, grandTotal, participantOrders };
+      const finalizedOrder = { spaceId, orderName: space.spaceName || "Order", restaurant: space.restaurantName || "Restaurant", currency: space.currency || DEFAULT_CURRENCY, collectiveOrder, grandTotal, participantOrders };
       await api.order.finalizeSpace(spaceId, finalizedOrder);
       dispatch(setFinalizedOrder(finalizedOrder));
       navigate(`/finalized-order/${spaceId}`);

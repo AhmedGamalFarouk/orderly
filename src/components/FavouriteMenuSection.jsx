@@ -5,6 +5,7 @@ const FavouriteMenuSection = ({
   favouriteMenus,
   selectedFavouriteMenu,
   setSelectedFavouriteMenu,
+  currency,
 }) => {
   return (
     <div className="form-control flex flex-col gap-4">
@@ -36,7 +37,7 @@ const FavouriteMenuSection = ({
               ?.items.map((item, index) => (
                 <div key={index} className="flex justify-between font-body text-sm text-neutral">
                   <span>{item.name}</span>
-                  <span>{formatCurrency(item.price)}</span>
+                  <span>{formatCurrency(item.price, currency)}</span>
                 </div>
               ))}
           </div>

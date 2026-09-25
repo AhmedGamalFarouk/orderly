@@ -28,6 +28,7 @@ Orderly is a real-time web application that eliminates the chaos of group food o
 - **Delivery & Tip Calculator:** Add delivery fees and tax/tip with choice of **Proportional** (based on food subtotal) or **Equal** split across participants.
 - **Consolidated Kitchen View:** Grouped breakdown showing exact quantities of every dish ordered.
 - **Individual Participant Breakdown:** Clear receipts showing each person's exact subtotal, extra fee share, and final amount owed.
+- **Per-Space Currency:** Hosts pick the currency (EGP, USD, EUR, GBP, SAR, AED) when creating a space; menus, totals, and receipts all use it.
 - **Host Payment Handle:** Include Venmo, Instapay, or PayPal handles directly in the summary.
 - **Multi-Platform Receipt Export:** 1-click formatted text export for Slack, WhatsApp, or email.
 

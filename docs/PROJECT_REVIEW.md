@@ -1,6 +1,6 @@
 # Orderly — Project Review
 
-_Reviewed on 2026-09-25 against commit `846ae75`._
+_Reviewed on 2026-09-25 against commit `846ae75`. Status columns and checklists were updated as fixes landed._
 
 This review covers bugs, security issues, codebase health, and missing features in the Orderly app (React 19, Vite, Redux Toolkit, Firebase).
 
@@ -19,25 +19,25 @@ Severity key: 🔴 critical, 🟠 high, 🟡 medium, ⚪ low.
 
 ## 1. Summary
 
-| # | Finding | Severity | Area |
-|---|---------|----------|------|
-| S1 | Demo account email and password are hard-coded in the client bundle | 🔴 | Security |
-| S2 | Anyone can overwrite any guest's order (no participant ownership in rules) | 🟠 | Security |
-| S3 | Joining with an existing display name takes over that participant | 🟠 | Security / UX |
-| B1 | Category filter makes the +/- counters change the wrong dish | 🔴 | Bug |
-| B2 | Guests are not notified when the host finalizes, so later edits fail with errors | 🟠 | Bug |
-| B3 | Any signed-in user sees "Finalize & Lock Order" in another host's room | 🟠 | Bug |
-| B4 | Footer links `/about` and `/contact` go to non-existent routes (no 404 page) | 🟡 | Bug |
-| B5 | Currency mix-up: amounts use Egyptian pounds with Arabic digits, labels say `$` | 🟡 | Bug / UX |
-| B6 | Favourite menus lose item descriptions when reused | 🟡 | Bug |
-| B7 | Finalized receipt merges different items that share a name | ⚪ | Bug |
-| B8 | Active spaces always show a total of 0 on the dashboard | ⚪ | Bug |
-| B9 | Proportional fee split can be off by a cent (floating-point money) | ⚪ | Bug |
-| H1 | A stale duplicate app (`src/src/`, plus `src/package.json` and others) is committed | 🟠 | Health |
-| H2 | Large amount of dead code: unused slices, hooks, components, models, and API methods | 🟡 | Health |
-| H3 | Dev-only `/components-test` route ships to production | 🟡 | Health |
-| H4 | Duplicated auth-state listeners and duplicated demo-login code | ⚪ | Health |
-| H5 | Very little test coverage and no CI | 🟡 | Health |
+| # | Finding | Severity | Area | Status |
+|---|---------|----------|------|--------|
+| S1 | Demo account email and password are hard-coded in the client bundle | 🔴 | Security | ⏸️ Kept by owner decision |
+| S2 | Anyone can overwrite any guest's order (no participant ownership in rules) | 🟠 | Security | ⬜ Open |
+| S3 | Joining with an existing display name takes over that participant | 🟠 | Security / UX | ⬜ Open |
+| B1 | Category filter makes the +/- counters change the wrong dish | 🔴 | Bug | ✅ Done |
+| B2 | Guests are not notified when the host finalizes, so later edits fail with errors | 🟠 | Bug | ✅ Done |
+| B3 | Any signed-in user sees "Finalize & Lock Order" in another host's room | 🟠 | Bug | ✅ Done |
+| B4 | Footer links `/about` and `/contact` go to non-existent routes (no 404 page) | 🟡 | Bug | ✅ Done |
+| B5 | Currency mix-up: amounts use Egyptian pounds with Arabic digits, labels say `$` | 🟡 | Bug / UX | ✅ Done |
+| B6 | Favourite menus lose item descriptions when reused | 🟡 | Bug | ✅ Done |
+| B7 | Finalized receipt merges different items that share a name | ⚪ | Bug | ✅ Done |
+| B8 | Active spaces always show a total of 0 on the dashboard | ⚪ | Bug | ✅ Done |
+| B9 | Proportional fee split can be off by a cent (floating-point money) | ⚪ | Bug | 🟨 Partial (split is cent-exact; prices still stored as floats) |
+| H1 | A stale duplicate app (`src/src/`, plus `src/package.json` and others) is committed | 🟠 | Health | ✅ Done |
+| H2 | Large amount of dead code: unused slices, hooks, components, models, and API methods | 🟡 | Health | 🟨 Partial (files and deps removed; unused API methods, admin state and logs remain) |
+| H3 | Dev-only `/components-test` route ships to production | 🟡 | Health | ✅ Done |
+| H4 | Duplicated auth-state listeners and duplicated demo-login code | ⚪ | Health | 🟨 Partial (router hoisted, order math extracted; auth listeners still duplicated) |
+| H5 | Very little test coverage and no CI | 🟡 | Health | 🟨 Partial (CI and unit tests added; no rules or end-to-end tests yet) |
 
 ---
 
@@ -233,13 +233,21 @@ Severity key: 🔴 critical, 🟠 high, 🟡 medium, ⚪ low.
 ## 6. Suggested order of work
 
 1. **Now (security and correctness):**
-   - S1: remove the demo credentials and rotate the password.
-   - B1: key counters by item ID.
-   - B3: fix the admin check.
-   - B4: fix the footer links and add a 404 route.
+   - [ ] S1: remove the demo credentials and rotate the password. _Kept as is by the owner's decision._
+   - [x] B1: key counters by item ID.
+   - [x] B3: fix the admin check.
+   - [x] B4: fix the footer links and add a 404 route.
 2. **Next:**
-   - F10: Anonymous Auth, then tighten the participant rules (fixes S2 and S3).
-   - B2: live listener on the space document.
-   - B5: one currency and locale setting per space.
-3. **Cleanup:** H1 and H2 (delete `src/src`, the `cls` files, and dead code and dependencies), H3, and H5 (CI plus rules and aggregation tests).
-4. **Features:** F3, F4, F1, and F2 give the most value to hosts and guests. Then F5, F6, and F7.
+   - [ ] F10: Anonymous Auth, then tighten the participant rules (fixes S2 and S3).
+   - [x] B2: live listener on the space document.
+   - [x] B5: one currency setting per space, chosen when the space is created.
+3. **Cleanup:**
+   - [x] H1: delete `src/src` and the `cls` files.
+   - [ ] H2: dead code and dependencies. _Partly done: dead files, `framer-motion` and `lodash` removed._
+   - [x] H3: dev test page hidden in production.
+   - [ ] H5: CI plus rules and aggregation tests. _Partly done: CI and aggregation, fee-split and currency tests added; rules tests still to do._
+4. **Features:**
+   - [ ] F3, F4, F1, and F2 give the most value to hosts and guests.
+   - [ ] Then F5, F6, and F7.
+
+Also done along the way: B6, B7, B8, the cent-exact fee split from B9, and "Menu item IDs stored twice" from Smaller issues.

@@ -7,6 +7,8 @@ import OrderSideInfo from "../components/spaceScreenInfo/OrderSideInfo";
 import OrderItem from "../components/OrderItem";
 import { useParams } from "react-router";
 import { api } from "../Firebase/api_util.js";
+import { CurrencyContext } from "../utils/currencyContext";
+import { DEFAULT_CURRENCY } from "../utils/formatCurrency";
 import { resetMenu, setMenu, setQuantity } from "../features/slices/singlemenu.js";
 import { useDispatch, useSelector } from "react-redux";
 import UsernamePopup from "../components/userNamePopup.jsx";
@@ -246,6 +248,7 @@ export default function SpaceScreen() {
   )}`;
 
   return (
+    <CurrencyContext.Provider value={spaceInfo?.currency || DEFAULT_CURRENCY}>
     <Container>
       <UsernamePopup
         isOpen={showUsernamePopup}
@@ -403,5 +406,6 @@ export default function SpaceScreen() {
         </div>
       )}
     </Container>
+    </CurrencyContext.Provider>
   );
 }

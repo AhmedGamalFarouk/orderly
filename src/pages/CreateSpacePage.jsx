@@ -16,11 +16,13 @@ import { SparklesIcon } from "../assets/icons/icons";
 import { createNewSpace } from "../features/slices/spaceReducer";
 import { setCurrentSpace } from "../features/slices/adminReducer";
 import { handleError } from "../components/alerts";
+import { DEFAULT_CURRENCY } from "../utils/formatCurrency";
 
 const CreateSpacePage = () => {
   const [spaceName, setSpaceName] = useState("");
   const [description, setDescription] = useState("");
   const [restaurantName, setRestaurantName] = useState("");
+  const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
 
   const [menuOption, setMenuOption] = useState("createNew");
   const [menuItems, setMenuItems] = useState([
@@ -82,6 +84,7 @@ const CreateSpacePage = () => {
         spaceName,
         description,
         restaurantName,
+        currency,
       },
       menuSetup: {
         menuOption,
@@ -203,6 +206,8 @@ const CreateSpacePage = () => {
               setDescription={setDescription}
               restaurantName={restaurantName}
               setRestaurantName={setRestaurantName}
+              currency={currency}
+              setCurrency={setCurrency}
             />
           </div>
 
@@ -231,6 +236,7 @@ const CreateSpacePage = () => {
                   favouriteMenuName={favouriteMenuName}
                   setFavouriteMenuName={setFavouriteMenuName}
                   onApplyPreset={handleApplyPreset}
+                  currency={currency}
                 />
               )}
 
@@ -238,7 +244,13 @@ const CreateSpacePage = () => {
                 <FavouriteMenuSection
                   favouriteMenus={favouriteMenus}
                   selectedFavouriteMenu={selectedFavouriteMenu}
-                  setSelectedFavouriteMenu={setSelectedFavouriteMenu}
+                  setSelectedFavouriteMenu={(menuId) => {
+                    setSelectedFavouriteMenu(menuId);
+                    // Default to the currency the favourite menu was priced in.
+                    const menu = favouriteMenus.find((item) => item.id === menuId);
+                    if (menu?.currency) setCurrency(menu.currency);
+                  }}
+                  currency={currency}
                 />
               )}
             </div>

@@ -137,6 +137,7 @@ export default function Landing() {
                           total={space.total ?? 0}
                           status={space.status || "active"}
                           hasFinalizedOrder={Boolean(space.finalizedOrder)}
+                          currency={space.currency}
                         />
                       ))}
                     </div>
@@ -159,6 +160,7 @@ export default function Landing() {
                           total={space.total ?? 0}
                           status={space.status || "finalized"}
                           hasFinalizedOrder={Boolean(space.finalizedOrder)}
+                          currency={space.currency}
                         />
                       ))}
                     </div>

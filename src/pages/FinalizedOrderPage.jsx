@@ -16,7 +16,7 @@ import { handleToast, handleError } from "../components/alerts";
 import CelebrationAnimation from "../components/CelebrationAnimation";
 import { api } from "../Firebase/api_util";
 import { setFinalizedOrder } from "../features/slices/orderSlice";
-import { formatCurrency } from "../utils/formatCurrency";
+import { DEFAULT_CURRENCY, formatCurrency as formatAmount } from "../utils/formatCurrency";
 import { splitExtraFees } from "../utils/orderSummary";
 
 const FinalizedOrderPage = () => {
@@ -73,6 +73,8 @@ const FinalizedOrderPage = () => {
     );
   }
 
+  const receiptCurrency = finalizedOrder.currency || DEFAULT_CURRENCY;
+  const formatCurrency = (value) => formatAmount(value, receiptCurrency);
   const money = (value) => (Number.isFinite(Number(value)) ? Number(value) : 0);
   const collectiveOrder = (Array.isArray(finalizedOrder.collectiveOrder)
     ? finalizedOrder.collectiveOrder
@@ -218,7 +220,7 @@ _Generated with Orderly_`;
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="label text-xs font-bold text-base-content uppercase tracking-wider p-1">
-                Delivery Fee
+                Delivery Fee ({receiptCurrency})
               </label>
               <input
                 type="number"
@@ -233,7 +235,7 @@ _Generated with Orderly_`;
 
             <div>
               <label className="label text-xs font-bold text-base-content uppercase tracking-wider p-1">
-                Tip / Tax
+                Tip / Tax ({receiptCurrency})
               </label>
               <input
                 type="number"

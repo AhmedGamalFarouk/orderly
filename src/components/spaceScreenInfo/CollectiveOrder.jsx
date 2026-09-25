@@ -1,8 +1,9 @@
 import { useSelector } from "react-redux";
-import { formatCurrency } from "../../utils/formatCurrency";
+import { useFormatMoney } from "../../utils/currencyContext";
 import { ReceiptIcon } from "../../assets/icons/icons";
 
 export default function CollectiveOrder() {
+  const formatCurrency = useFormatMoney();
   const participants = useSelector((state) => state.participants);
   const menuItems = Object.values(
     participants.reduce((items, participant) => {

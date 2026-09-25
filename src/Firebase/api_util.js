@@ -270,6 +270,7 @@ export const api = {
             space.spaceName ||
             space.name ||
             "Unnamed Menu",
+          currency: space.currency,
           items: menuItems.map((item) => ({
             name: item.name,
             description: item.description || "",

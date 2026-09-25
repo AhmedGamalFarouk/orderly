@@ -46,6 +46,7 @@ const CreateNewMenuSection = ({
   favouriteMenuName,
   setFavouriteMenuName,
   onApplyPreset,
+  currency,
 }) => {
   const [showBulkPaste, setShowBulkPaste] = useState(false);
   const [bulkText, setBulkText] = useState("");
@@ -120,12 +121,12 @@ const CreateNewMenuSection = ({
         {showBulkPaste && (
           <div className="mt-4 pt-3 border-t border-base-200">
             <p className="text-xs text-neutral mb-2">
-              Paste lines formatted as <code>Item Name - $Price</code>:
+              Paste lines formatted as <code>Item Name - Price</code>:
             </p>
             <textarea
               className="textarea textarea-bordered w-full text-xs font-mono rounded-xl bg-white"
               rows={3}
-              placeholder="Cheeseburger - $12&#10;Crispy Fries - $4&#10;Iced Tea - $3"
+              placeholder="Cheeseburger - 12&#10;Crispy Fries - 4&#10;Iced Tea - 3"
               value={bulkText}
               onChange={(e) => setBulkText(e.target.value)}
             />
@@ -168,7 +169,7 @@ const CreateNewMenuSection = ({
               </div>
               <div className="sm:col-span-3">
                 <FormInput
-                  label="Price ($)"
+                  label={`Price (${currency})`}
                   type="number"
                   placeholder="12.00"
                   value={item.price}

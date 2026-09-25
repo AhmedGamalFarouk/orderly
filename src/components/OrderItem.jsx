@@ -1,8 +1,9 @@
-import { formatCurrency } from "../utils/formatCurrency";
+import { useFormatMoney } from "../utils/currencyContext";
 import Counter from "./Counter";
 import { FoodCategoryIcon } from "../assets/icons/icons";
 
 export default function OrderItem({ menu, disabled = false }) {
+  const formatCurrency = useFormatMoney();
   return (
     <>
       {menu.map((m, ind) => {
