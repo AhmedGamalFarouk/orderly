@@ -17,6 +17,7 @@ import CelebrationAnimation from "../components/CelebrationAnimation";
 import { api } from "../Firebase/api_util";
 import { setFinalizedOrder } from "../features/slices/orderSlice";
 import { formatCurrency } from "../utils/formatCurrency";
+import { splitExtraFees } from "../utils/orderSummary";
 
 const FinalizedOrderPage = () => {
   const finalizedOrder = useSelector((state) => state.order.finalizedOrder);
@@ -109,23 +110,17 @@ const FinalizedOrderPage = () => {
   const extraFeesTotal = feeVal + tipVal;
   const grandTotalWithFees = subtotalSum + extraFeesTotal;
 
-  // Calculate adjusted split per participant
-  const totalParticipants = Math.max(1, participantOrders.length);
-  const splitBreakdown = participantOrders.map((p) => {
-    let participantExtra = 0;
-    if (splitMode === "equal") {
-      participantExtra = extraFeesTotal / totalParticipants;
-    } else {
-      // Proportional split based on food subtotal
-      participantExtra = subtotalSum > 0 ? (p.total / subtotalSum) * extraFeesTotal : 0;
-    }
-    const finalOwed = p.total + participantExtra;
-    return {
-      ...p,
-      extraShare: participantExtra,
-      finalTotal: finalOwed,
-    };
-  });
+  // Split delivery & tip per participant (cent-exact)
+  const extraShares = splitExtraFees(
+    participantOrders.map((p) => p.total),
+    extraFeesTotal,
+    splitMode
+  );
+  const splitBreakdown = participantOrders.map((p, index) => ({
+    ...p,
+    extraShare: extraShares[index],
+    finalTotal: p.total + extraShares[index],
+  }));
 
   const collectiveTableHeaders = [
     { key: "qty", label: "Qty" },
@@ -223,7 +218,7 @@ _Generated with Orderly_`;
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="label text-xs font-bold text-base-content uppercase tracking-wider p-1">
-                Delivery Fee ($)
+                Delivery Fee
               </label>
               <input
                 type="number"
@@ -238,7 +233,7 @@ _Generated with Orderly_`;
 
             <div>
               <label className="label text-xs font-bold text-base-content uppercase tracking-wider p-1">
-                Tip / Tax ($)
+                Tip / Tax
               </label>
               <input
                 type="number"

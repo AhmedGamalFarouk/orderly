@@ -1,11 +1,3 @@
-// import { configureStore } from "@reduxjs/toolkit";
-// import spaceReducer from "./slices/spaceReducer";
-// import participantsReducer from "./slices/participantsReducer";
-// import orderReducer from "./slices/orderSlice";
-// import adminReducer from "./slices/adminReducer";
-// import menuReducer from "./slices/menuSlice";
-// import singlemenuReducer from "./slices/singlemenu";
-
 // store.js
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import {

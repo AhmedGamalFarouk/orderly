@@ -175,6 +175,21 @@ export default function SpaceScreen() {
       .catch(handleError);
   }, [arr, dispatch, menu, menuLoaded, participantId, selectionHydrated, spaceFinalized, spaceId]);
 
+  // Keep the room in sync with the host: once the space is finalized, lock
+  // the counters for every guest instead of letting their writes fail.
+  useEffect(() => {
+    if (!spaceId || !menuLoaded) return;
+    return api.space.watchSpace(
+      spaceId,
+      (space) => {
+        if (!space) return;
+        setSpaceInfo(space);
+        setSpaceFinalized(space.status === "finalized" || Boolean(space.finalizedOrder));
+      },
+      (error) => console.error("Failed to listen to space:", error)
+    );
+  }, [menuLoaded, spaceId]);
+
   const handleCopyLink = async () => {
     if (!navigator.clipboard?.writeText) {
       handleError("Clipboard access is unavailable in this browser.");
@@ -200,7 +215,7 @@ export default function SpaceScreen() {
             String(item.legacyId) === String(selected.itemId)
         );
         if (index >= 0 && arr[index].quantity !== Number(selected.quantity)) {
-          dispatch(setQuantity({ ind: index, quantity: Number(selected.quantity) }));
+          dispatch(setQuantity({ id: arr[index].id, quantity: Number(selected.quantity) }));
         }
       });
     }
@@ -380,7 +395,7 @@ export default function SpaceScreen() {
               <div className="bg-white p-5 rounded-2xl shadow-xs border border-base-200">
                 <CollectiveOrder />
                 <div className="mt-4">
-                  <OrderSideInfo isFinalized={spaceFinalized} />
+                  <OrderSideInfo isFinalized={spaceFinalized} spaceAdminId={spaceInfo?.adminId} />
                 </div>
               </div>
             </aside>

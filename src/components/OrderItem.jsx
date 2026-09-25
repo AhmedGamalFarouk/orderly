@@ -50,7 +50,7 @@ export default function OrderItem({ menu, disabled = false }) {
                 <span className="font-body text-xs font-semibold text-neutral/70">
                   Select Qty
                 </span>
-                <Counter ind={ind} disabled={disabled}>
+                <Counter id={m.id} disabled={disabled}>
                   <Counter.Decrement />
                   <Counter.Count />
                   <Counter.Increment />

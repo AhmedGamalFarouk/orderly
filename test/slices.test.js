@@ -7,17 +7,27 @@ test("single menu tracks item quantity and total", () => {
   let state = singlemenuReducer(undefined, setMenu({ id: "burger", name: "Burger", price: "10" }));
   state = singlemenuReducer(state, setMenu({ id: "legacy-burger", legacyId: 7, name: "Legacy Burger", price: 3 }));
   assert.equal(state.arr[1].legacyId, 7);
-  state = singlemenuReducer(state, setQuantity({ ind: 0, quantity: 2 }));
+  state = singlemenuReducer(state, setQuantity({ id: "burger", quantity: 2 }));
 
   assert.equal(state.arr[0].quantity, 2);
   assert.equal(state.total, 20);
 
-  state = singlemenuReducer(state, setQuantity({ ind: 0, quantity: -4 }));
+  state = singlemenuReducer(state, setQuantity({ id: "burger", quantity: -4 }));
   assert.equal(state.arr[0].quantity, 0);
   assert.equal(state.total, 0);
 
   state = singlemenuReducer(state, resetMenu());
   assert.deepEqual(state, { arr: [], total: 0, userId: -1 });
+});
+
+test("single menu quantities are keyed by item id, not position", () => {
+  let state = singlemenuReducer(undefined, setMenu({ id: "burger", name: "Burger", price: 10 }));
+  state = singlemenuReducer(state, setMenu({ id: "shake", name: "Shake", price: 4 }));
+  state = singlemenuReducer(state, setQuantity({ id: "shake", quantity: 3 }));
+
+  assert.equal(state.arr[0].quantity, 0);
+  assert.equal(state.arr[1].quantity, 3);
+  assert.equal(state.total, 12);
 });
 
 test("collective total recalculates and clears", () => {

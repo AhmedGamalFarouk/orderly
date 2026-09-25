@@ -1,4 +1,5 @@
 import React from "react";
+import { formatCurrency } from "../utils/formatCurrency";
 
 const FavouriteMenuSection = ({
   favouriteMenus,
@@ -35,7 +36,7 @@ const FavouriteMenuSection = ({
               ?.items.map((item, index) => (
                 <div key={index} className="flex justify-between font-body text-sm text-neutral">
                   <span>{item.name}</span>
-                  <span>${item.price}</span>
+                  <span>{formatCurrency(item.price)}</span>
                 </div>
               ))}
           </div>

@@ -25,6 +25,7 @@ const FinalizedOrderPage = lazy(() => import("./pages/FinalizedOrderPage"));
 const ComponentsTestPage = lazy(() => import("./pages/ComponentsTestPage"));
 const AboutUsPage = lazy(() => import("./pages/AboutUsPage"));
 const ContactUsPage = lazy(() => import("./pages/ContactUsPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 function AuthSessionSync() {
   const dispatch = useDispatch();
@@ -46,64 +47,74 @@ function AuthSessionSync() {
   return null;
 }
 
-function App() {
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      element: <Layout />,
-      children: [
-        {
-          index: true,
-          element: <Auth />,
-        },
-        {
-          path: "signup",
-          element: <SignUp />,
-        },
-        {
-          path: "signin",
-          element: <Auth />,
-        },
-        {
-          path: "home",
-          element: <RequireAuth><Landing /></RequireAuth>,
-        },
-        {
-          path: "checkout/:spaceId",
-          element: <SpaceScreen />,
-        },
-        {
-          path: "create-space",
-          element: <RequireAuth><CreateSpacePage /></RequireAuth>,
-        },
-        {
-          path: "finalized-order/:spaceId",
-          element: <RequireAuth><FinalizedOrderPage /></RequireAuth>,
-        },
-        {
-          path: "finalized-order",
-          element: <RequireAuth><FinalizedOrderPage /></RequireAuth>,
-        },
-        {
-          path: "components-test",
-          element: <RequireAuth><ComponentsTestPage /></RequireAuth>,
-        },
-        {
-          path: "space/:spaceId",
-          element: <SpaceScreen />,
-        },
-        {
-          path: "about-us",
-          element: <AboutUsPage />,
-        },
-        {
-          path: "contact-us",
-          element: <ContactUsPage />,
-        },
-      ],
-    },
-  ]);
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Layout />,
+    errorElement: <NotFoundPage />,
+    children: [
+      {
+        index: true,
+        element: <Auth />,
+      },
+      {
+        path: "signup",
+        element: <SignUp />,
+      },
+      {
+        path: "signin",
+        element: <Auth />,
+      },
+      {
+        path: "home",
+        element: <RequireAuth><Landing /></RequireAuth>,
+      },
+      {
+        path: "checkout/:spaceId",
+        element: <SpaceScreen />,
+      },
+      {
+        path: "create-space",
+        element: <RequireAuth><CreateSpacePage /></RequireAuth>,
+      },
+      {
+        path: "finalized-order/:spaceId",
+        element: <RequireAuth><FinalizedOrderPage /></RequireAuth>,
+      },
+      {
+        path: "finalized-order",
+        element: <RequireAuth><FinalizedOrderPage /></RequireAuth>,
+      },
+      // Developer playground; not shipped in production builds.
+      ...(import.meta.env.DEV
+        ? [
+            {
+              path: "components-test",
+              element: <RequireAuth><ComponentsTestPage /></RequireAuth>,
+            },
+          ]
+        : []),
+      {
+        path: "space/:spaceId",
+        element: <SpaceScreen />,
+      },
+      {
+        path: "about-us",
+        element: <AboutUsPage />,
+      },
+      {
+        path: "contact-us",
+        element: <ContactUsPage />,
+      },
+      {
+        path: "*",
+        element: <NotFoundPage />,
+      },
+    ],
+  },
+]);
 
+function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={<Spinner />} persistor={persistor}>

@@ -7,9 +7,9 @@ const singlemenu = createSlice({
   reducers: {
     resetMenu: () => ({ arr: [], total: 0, userId: -1 }),
     setQuantity: (state, action) => {
-      const { ind, quantity } = action.payload;
+      const { id, quantity } = action.payload;
 
-      const item = state.arr.find((item, i) => i === ind);
+      const item = state.arr.find((item) => item.id === id);
       if (item) {
         const parsedQuantity = Number(quantity);
         const nextQuantity = Number.isFinite(parsedQuantity)

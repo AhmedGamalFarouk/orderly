@@ -77,7 +77,7 @@ export default function RecentOrder({
             {date}
           </span>
           <span className="font-body text-base font-bold text-primary">
-            {formatCurrency(total)}
+            {isFinalized ? formatCurrency(total) : "Ordering open"}
           </span>
         </div>
 

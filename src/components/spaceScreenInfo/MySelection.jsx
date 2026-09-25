@@ -27,10 +27,9 @@ export default function MySelection() {
           </div>
         ) : (
           selectedItems.map((item) => {
-            const index = arr.indexOf(item);
             return (
               <div
-                key={item.id || index}
+                key={item.id}
                 className="flex justify-between items-center p-2.5 rounded-xl bg-base-200/50 hover:bg-base-200/80 transition-colors border border-base-200"
               >
                 <div className="flex flex-col min-w-0 pr-2">
@@ -49,7 +48,7 @@ export default function MySelection() {
                     type="button"
                     aria-label={`Remove ${item.name}`}
                     className="btn btn-ghost btn-xs btn-circle text-neutral hover:text-error hover:bg-error/10"
-                    onClick={() => dispatch(setQuantity({ ind: index, quantity: 0 }))}
+                    onClick={() => dispatch(setQuantity({ id: item.id, quantity: 0 }))}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4v3M4 7h16" />

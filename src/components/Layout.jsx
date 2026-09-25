@@ -25,10 +25,10 @@ export default function Layout() {
           </div>
 
           <div className="flex items-center gap-6 font-medium">
-            <Link to="/about" className="hover:text-primary transition-colors">
+            <Link to="/about-us" className="hover:text-primary transition-colors">
               About
             </Link>
-            <Link to="/contact" className="hover:text-primary transition-colors">
+            <Link to="/contact-us" className="hover:text-primary transition-colors">
               Contact
             </Link>
             <Link to="/home" className="hover:text-primary transition-colors">

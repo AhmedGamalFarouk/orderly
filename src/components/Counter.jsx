@@ -5,15 +5,15 @@ import { useDispatch, useSelector } from "react-redux";
 
 const CounterContext = createContext();
 
-function Counter({ children, ind, disabled = false }) {
+function Counter({ children, id, disabled = false }) {
   const dispatch = useDispatch();
-  const count = useSelector((state) => state.single.arr[ind]?.quantity ?? 0);
+  const count = useSelector((state) => state.single.arr.find((item) => item.id === id)?.quantity ?? 0);
   const increment = () => {
-    dispatch(setQuantity({ ind: ind, quantity: count + 1 }));
+    dispatch(setQuantity({ id, quantity: count + 1 }));
   };
   const decrement = () => {
     if (count === 0) return;
-    dispatch(setQuantity({ ind: ind, quantity: count - 1 }));
+    dispatch(setQuantity({ id, quantity: count - 1 }));
   };
 
   return (

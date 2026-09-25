@@ -11,6 +11,7 @@ import {
   addDoc,
   writeBatch,
   runTransaction,
+  onSnapshot,
 } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
@@ -150,9 +151,11 @@ export const api = {
       const batch = writeBatch(db);
       batch.set(newSpaceDoc, spaceData);
       menuItems.forEach((item, index) => {
+        // The form's temporary row id is not stored; the document id is the item id.
+        const { id: _formRowId, ...fields } = item;
         batch.set(
           doc(db, SPACES_TBL, spaceId, MENUEITEMS_TBL, `${spaceId}-${index}`),
-          { ...item, quantity: 0 }
+          { ...fields, quantity: 0 }
         );
       });
       await batch.commit();
@@ -236,9 +239,17 @@ export const api = {
         ...data,
       };
     },
+    // Subscribe to live changes of a space document (status, finalization).
+    // Returns the unsubscribe function.
+    watchSpace: (spaceId, onChange, onError) =>
+      onSnapshot(
+        doc(db, SPACES_TBL, spaceId),
+        (docSnap) =>
+          onChange(docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null),
+        onError
+      ),
     getFavouriteMenuItemsByAdmin: async (adminId) => {
       const adminSpaces = await api.order.getSpacesByAdmin(adminId);
-      console.log(adminSpaces);
       // Filter spaces where isFavourite is true
       const favouriteSpaces = adminSpaces.filter(
         (space) => space.isFavourite === true
@@ -261,7 +272,9 @@ export const api = {
             "Unnamed Menu",
           items: menuItems.map((item) => ({
             name: item.name,
+            description: item.description || "",
             price: item.price,
+            ...(item.imageUrl ? { imageUrl: item.imageUrl } : {}),
           })),
         });
       }

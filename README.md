@@ -48,7 +48,7 @@ Orderly is a real-time web application that eliminates the chaos of group food o
 | **Styling & UI** | [Tailwind CSS v4](https://tailwindcss.com/) + [DaisyUI v5](https://daisyui.com/) |
 | **Backend & Realtime** | [Firebase Firestore](https://firebase.google.com/products/firestore) (Realtime listeners) |
 | **Authentication** | [Firebase Auth](https://firebase.google.com/products/auth) (Email/Password & Google Sign-In) |
-| **Icons & Animation** | Custom SVG suite + [Framer Motion](https://www.framer.com/motion/) |
+| **Icons & Animation** | Custom SVG suite + CSS animations |
 | **Notifications** | [SweetAlert2](https://sweetalert2.github.io/) |
 
 ---
