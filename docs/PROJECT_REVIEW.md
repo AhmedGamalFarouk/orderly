@@ -171,7 +171,7 @@ Severity key: 🔴 critical, 🟠 high, 🟡 medium, ⚪ low.
   - `Firebase/models.js` is unused, and its `fromFirestore` methods pass arguments the constructors ignore.
 - **Unused hooks:** `usePrompt`, `useConfirmNavigation`, `useGoogleAuth`, `useSyncOrderToFirebase` (which writes to an `orders` collection the rules don't allow), and `useConfirmExit .js` (the filename contains a space).
 - **Unused components:** `TestDashBoard`, `NavigationPromptWrapper`, `LoginForm`, `components/SignUp`, `Home`, `Pagination`, `TextField`, and `CheckItem`. Several are used only by the dev test page.
-- **Unused API methods:** `submitOrder`, `getMyOrder`, `createSpace`, `addMenuItem`, `updateMenuItem`, `getSpaceDetails`, `isInUse`, `updateSpaceName`, `deleteSpace`, and `fetchAdminData`.
+- **Unused API methods:** `submitOrder`, `getMyOrder`, `updateMenuItem`, `getSpaceDetails`, `isInUse`, `updateSpaceName`, `deleteSpace`, and `fetchAdminData` are never called. `createSpace` and `addMenuItem` are called only from the dead `Home` component.
 - **Unused state:** The `admin` slice's `spaces`, `orders`, `currentOrder`, and `currentSpace` fields are set but never read.
 - **Unused dependencies:** `framer-motion` is never imported. `lodash` is used only by a dead hook.
 - **Leftovers:**
